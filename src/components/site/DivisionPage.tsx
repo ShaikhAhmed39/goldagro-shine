@@ -65,7 +65,7 @@ function Header({ d }: { d: Division }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <a href={`https://wa.me/${PHONES[0].wa}`} target="_blank" rel="noreferrer" className="lift hidden rounded-sm bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground sm:inline-block">
+            <a href={`https://wa.me/${PHONES[0]!.wa}`} target="_blank" rel="noreferrer" className="lift hidden rounded-sm bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground sm:inline-block">
               {d.key === "agro" ? "Contact Desk" : "WhatsApp Us"}
             </a>
             <button aria-label="Open menu" onClick={() => setOpen(true)} className="grid h-11 w-11 place-items-center rounded-sm border text-foreground lg:hidden">
@@ -240,7 +240,7 @@ function Credentials({ d }: { d: Division }) {
 }
 
 function Collections({ d }: { d: Division }) {
-  const [tab, setTab] = useState(d.tabs[0].id);
+  const [tab, setTab] = useState(d.tabs[0]!.id);
   const items = d.products.filter((p) => p.cat === tab);
   return (
     <section id="collections" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
@@ -308,7 +308,7 @@ function CrossDivision() {
           <p className="mt-4 text-muted-foreground">Beyond imitation jewellery, GOLDAGRO exports premium agro commodities directly from harvesting points across India, under strictly regulated phytosanitary standards.</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link to="/" className="lift rounded-sm bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground">View Agro Portfolio</Link>
-            <a href={`https://wa.me/${PHONES[0].wa}`} target="_blank" rel="noreferrer" className="lift rounded-sm border px-6 py-3 text-sm font-semibold">WhatsApp Agro Dept.</a>
+            <a href={`https://wa.me/${PHONES[0]!.wa}`} target="_blank" rel="noreferrer" className="lift rounded-sm border px-6 py-3 text-sm font-semibold">WhatsApp Agro Dept.</a>
           </div>
         </div>
         <div className="grid gap-4">
@@ -327,7 +327,7 @@ function CrossDivision() {
 const field = "w-full rounded-sm border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary";
 
 function Inquiry({ d }: { d: Division }) {
-  const [f, setF] = useState({ name: "", email: "", phone: "", cat: d.inquiry.categories[0], rep: "0", msg: "" });
+  const [f, setF] = useState({ name: "", email: "", phone: "", cat: d.inquiry.categories[0]!, rep: "0", msg: "" });
   const body = () =>
     `Hello GOLDAGRO,\n\nName: ${f.name}\nEmail: ${f.email}\nPhone: ${f.phone}\nCategory: ${f.cat}\n\n${f.msg}`;
   const valid = () => {
@@ -340,7 +340,7 @@ function Inquiry({ d }: { d: Division }) {
   const viaWa = (e: FormEvent) => {
     e.preventDefault();
     if (!valid()) return;
-    window.open(`https://wa.me/${PHONES[Number(f.rep)].wa}?text=${encodeURIComponent(body())}`, "_blank");
+    window.open(`https://wa.me/${PHONES[Number(f.rep)]!.wa}?text=${encodeURIComponent(body())}`, "_blank");
   };
   const viaMail = () => {
     if (!valid()) return;
@@ -362,7 +362,7 @@ function Inquiry({ d }: { d: Division }) {
           {d.inquiry.categories.map((c) => <option key={c}>{c}</option>)}
         </select>
         <select className={`${field} sm:col-span-2`} value={f.rep} onChange={set("rep")}>
-          {d.inquiry.reps.map((r, i) => <option key={r} value={i}>{r} ({PHONES[i].label})</option>)}
+          {d.inquiry.reps.map((r, i) => <option key={r} value={i}>{r} ({PHONES[i]?.label})</option>)}
         </select>
         <textarea className={`${field} min-h-32 sm:col-span-2`} placeholder={d.key === "agro" ? "Transit volume requirements" : "Business requirements"} value={f.msg} onChange={set("msg")} maxLength={1500} />
         <button type="submit" className="lift rounded-sm bg-gradient-gold px-6 py-3.5 font-semibold text-primary-foreground">📱 Submit via WhatsApp</button>
@@ -413,7 +413,7 @@ function Footer({ d }: { d: Division }) {
         </div>
         <div className="grid gap-2 text-sm">
           <Link to={d.switchTo} className="text-primary">{d.key === "agro" ? "Jewellery Portfolio ↗" : "Agro Exports ↗"}</Link>
-          <a href={`https://wa.me/${PHONES[0].wa}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary">WhatsApp Desk</a>
+          <a href={`https://wa.me/${PHONES[0]!.wa}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary">WhatsApp Desk</a>
         </div>
       </div>
       <p className="mx-auto mt-10 max-w-7xl border-t pt-6 text-xs text-muted-foreground">© 2026 Goldagro Global Export. All Rights Reserved.</p>
