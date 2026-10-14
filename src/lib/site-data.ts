@@ -23,7 +23,7 @@ export const PHONES = [
 export const EMAIL = "ak12341235@gmail.com";
 export const GST = "27HFFPK4882F1Z3";
 export const ADDRESS =
-  "301 Wing B, Garden View, Opp S Garden, Off Kashimira Road 60 Ft, Near Shiver Garden, Mira Road East, Mira Bhayandar, Thane, Maharashtra 401101";
+  "Dream house,shop no 6,1 floor, naya nagar,mira road (E),thane:401107, maharashtra";
 
 export const CERTS: Cert[] = [
   {
@@ -101,7 +101,7 @@ export const AGRO: Division = {
     lines: ["Premium Indian Spices,", "Fresh", "Fruits & Veggies"],
     tag: "Direct Farm-to-Port Supply Chain",
     body: "GOLDAGRO Agricultural Commodities Division processes, packs, and exports the finest fresh harvest from India's fertile states — with strict customs clearance and cargo safety.",
-    img: "/images/agro/spices/turmeric.jpeg",
+    img: "/images/agro/spices/dried_red_chillies.jpeg",
     stats: [["100%", "Farm Sourced"], ["20+", "Global Ports"], ["Reefer", "Cold Storage"]],
   },
   marquee: ["Phytosanitary Certified", "Automated Crop Grading", "Fumigated Sea Freight", "APEDA Quality Standard", "Direct Farm Sourcing"],
@@ -111,7 +111,7 @@ export const AGRO: Division = {
     body: "Based in Thane, Maharashtra, GOLDAGRO GLOBAL EXPORT represents excellence in the sourcing and transit of raw Indian crops. Partnering with central farming coordinates, we ensure produce keeps its moisture, clean visual grades, and safe transit temperatures.",
     points: ["Certified Cold Chain", "Traceable Sourcing", "APEDA/Spices Board Standards", "Containerized Sea Freight"],
     years: "Years of Global Sourcing",
-    img: "/images/agro/fruits/alphonso_mango.png",
+    img: "/images/agro/fruits/pineapple.jpeg",
   },
   credBody: "We hold full legal export registration with Indian agricultural departments, ensuring zero delays at customs check posts worldwide.",
   collectionsTitle: ["Agricultural", "Commodities"],
@@ -120,23 +120,29 @@ export const AGRO: Division = {
     { id: "Vegetables", label: "Fresh Vegetables" },
     { id: "Fruits", label: "Exotic Fruits" },
   ],
-  products: [
-    a("Spices", "Spices", "Organic Turmeric Finger (High Curcumin)", "spices/turmeric.jpeg"),
-    a("Spices", "Spices", "Premium Cumin Seeds (Singapore Clean)", "spices/cumin.jpeg"),
-    a("Spices", "Spices", "Garam Masala (Traditional Aromatic Blend)", "spices/garam_masala.jpeg"),
-    a("Spices", "Spices", "Whole Coriander Seeds (Double Parrot)", "spices/coriander.jpeg"),
-    a("Vegetables", "Vegetables", "Nashik Red Onions (45mm - 55mm+)", "vegtables/red_onion.jpeg"),
-    a("Vegetables", "Vegetables", "Premium Table Potatoes (Jyoti/Pukhraj Grades)", "vegtables/potatoes.jpeg"),
-    a("Vegetables", "Vegetables", "Fresh Green Chillies (Spicy Export Grade)", "vegtables/green_chilli.jpeg"),
+    products: [
+    // --- SPICES ---
+    a("Spices", "Spices", "Premium Red Chilli Powder (High Pungency & Color)", "spices/red_chilli_powder.jpeg"),
+    a("Spices", "Spices", "Premium Dry Red Chilli (Guntur/Teja Export Grade)", "spices/dried_red_chillies.jpeg"),
+    a("Spices", "Spices", "Premium Green Cardamom (7mm - 8mm+ Bold Grade)", "spices/cardamom.jpeg"),
+    a("Spices", "Spices", "Premium Whole Nutmeg & Mace (With Essential Oils)", "spices/nutmeg_mace.jpeg"),
+    a("Spices", "Spices", "Premium Sesame Seeds (Pure Sorting Export Quality)", "spices/sesame.jpeg"),
+
+    // --- VEGETABLES ---
+    a("Vegetables", "Vegetables", "Nashik Red Onions (45mm - 55mm+)", "vegtables/onion.jpeg"),
     a("Vegetables", "Vegetables", "Fresh Garden Spinach (Nutrient Rich)", "vegtables/spanich.jpeg"),
-    a("Vegetables", "Vegetables", "Farm Fresh Red Tomatoes (Firm Quality)", "vegtables/tomatoes.jpeg"),
-    a("Fruits", "Fruits", "Fresh Ratnagiri Alphonso Mangoes", "fruits/alphonso_mango.png"),
-    a("Fruits", "Fruits", "Crisp Red Apples (Premium Harvest)", "fruits/apples.jpeg"),
+    a("Vegetables", "Vegetables", "Fresh Juicy Lemons (Premium Sorting)", "vegtables/lemon.jpeg"),
+    a("Vegetables", "Vegetables", "Fresh Green Peas (Premium Export Grade)", "vegtables/green_peas.jpeg"),
+    a("Vegetables", "Vegetables", "Sweet Tender Corn Ears (Golden Quality)", "vegtables/corn.jpeg"),
+
+    // --- FRUITS ---
+    a("Fruits", "Fruits", "Fresh Juicy Mosambi (Premium Indian Sweet Lime)", "fruits/sweet_lime.jpeg"),
     a("Fruits", "Fruits", "G-9 Cavendish Bananas (Strict Calibration)", "fruits/bananas.jpeg"),
-    a("Fruits", "Fruits", "Premium Pink Guavas (Sweet & Rich)", "fruits/guava.png"),
     a("Fruits", "Fruits", "Fresh Sweet Oranges (Juicy Citrus)", "fruits/oranges.jpeg"),
-    a("Fruits", "Fruits", "Juicy Seedless Watermelons (Crisp Sweet)", "fruits/watermelon.jpeg"),
+    a("Fruits", "Fruits", "Exotic Queen Pineapple (Sweet & Aromatic)", "fruits/pineapple.jpeg"),
+    a("Fruits", "Fruits", "Crisp Red Apples (Premium Harvest)", "fruits/apple.jpeg"),
   ],
+
   why: [
     { icon: "🚜", title: "Direct Procurement", body: "Sourcing directly from farms in Maharashtra and Kerala to lock in low FOB rates." },
     { icon: "🌡️", title: "Cold-Chain Protocol", body: "Reefer temperature preservation ensures crops land fresh." },
@@ -146,14 +152,14 @@ export const AGRO: Division = {
     title: "Submit Agro Inquiry",
     body: "Secure container space and pricing directly from Thane headquarters.",
     categories: ["Premium Spices", "Nashik Red Onions", "Table Potatoes", "Fresh Exotic Fruits", "Bulk Container Mix"],
-    reps: ["Primary Agro Representative", "Agro Logistical Manager", "Administrative Officer"],
+    reps: ["Primary Agro Representative"],
   },
   contactTitle: "Connect with Agro Desk",
   footerBlurb: "Direct premium quality suppliers of wholesale Indian crops, spices, and fresh vegetables to global buyers.",
 };
 
 const j = (folder: string, label: string, base: string, prefix: string) =>
-  Array.from({ length: 10 }, (_, i) => ({
+  Array.from({ length: 5 }, (_, i) => ({
     cat: label, label, name: `${base} ${i + 1}`, img: `/images/${folder}/${prefix}_${i + 1}.jpeg`,
   }));
 
@@ -211,7 +217,7 @@ export const JEWEL: Division = {
     title: "Submit Your Inquiry",
     body: "Choose your preferred method of contact below.",
     categories: ["Necklaces", "Bridal Sets", "Bangles", "Earrings", "Bulk Mixed Inventory"],
-    reps: ["Primary Representative", "Export Manager", "Sales Support"],
+    reps: ["Primary Representative"],
   },
   contactTitle: "Get in Touch",
   footerBlurb: "Leading exporters of luxury imitation jewellery and premium agricultural products from India.",
