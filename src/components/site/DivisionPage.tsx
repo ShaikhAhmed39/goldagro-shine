@@ -1,20 +1,46 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { Menu, X, ArrowUpRight, ShieldCheck, MapPin, Phone, Mail, Globe } from "lucide-react";
+import {
+  Menu,
+  X,
+  ArrowUpRight,
+  ShieldCheck,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  MessageCircle,
+} from "lucide-react";
 import { toast, Toaster } from "sonner";
-import { ADDRESS, CERTS, EMAIL, GST, PHONES, type Cert, type Division } from "@/lib/site-data";
+import {
+  ADDRESS,
+  BUYER_FAQ,
+  CERTS,
+  EMAIL,
+  GST,
+  ORDER_STEPS,
+  PHONES,
+  TRUST_HIGHLIGHTS,
+  getProductDetails,
+  type Cert,
+  type Division,
+  type Product,
+} from "@/lib/site-data";
 
 const SECURITY_MSG =
   "Security Protocol: Direct archiving, local printing, or devtools inspection of official enterprise credentials is fully restricted.";
 
 function useSecurityShield() {
   useEffect(() => {
-    const warn = () =>
-      toast.error("Restricted", { description: SECURITY_MSG, id: "security" });
+    const warn = () => toast.error("Restricted", { description: SECURITY_MSG, id: "security" });
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
       const mod = e.ctrlKey || e.metaKey;
-      if (e.key === "F12" || (mod && (k === "p" || k === "s")) || (mod && e.shiftKey && ["i", "j", "c"].includes(k))) {
+      if (
+        e.key === "F12" ||
+        (mod && (k === "p" || k === "s")) ||
+        (mod && e.shiftKey && ["i", "j", "c"].includes(k))
+      ) {
         e.preventDefault();
         e.stopPropagation();
         warn();
@@ -31,21 +57,30 @@ function useSecurityShield() {
 }
 
 function Eyebrow({ children }: { children: string }) {
-  return <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary">✦ {children}</p>;
+  return (
+    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+      ✦ {children}
+    </p>
+  );
 }
 
 function Header({ d }: { d: Division }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
   return (
     <>
       <div className="border-b bg-card px-4 py-2 text-[11px] tracking-[0.15em] sm:text-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <span className="min-w-0 truncate uppercase text-muted-foreground">✦ {d.strip}</span>
-          <Link to={d.switchTo} className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary hover:text-primary-glow">
+          <Link
+            to={d.switchTo}
+            className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary hover:text-primary-glow"
+          >
             {d.switchLabel} <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -53,40 +88,78 @@ function Header({ d }: { d: Division }) {
       <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 lg:flex lg:justify-between">
           <a href="#home" className="flex min-w-0 items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-gold font-display text-lg font-bold text-primary-foreground">G</span>
+            <span className="grid h-10 w-10 shrink-0 place-items-center">
+              <img
+                src="/images/logo/logo.jpeg"
+                alt="GOLDAGRO Global Export"
+                className="h-10 w-10 object-contain"
+              />
+            </span>
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-display text-lg tracking-[0.2em]">GOLDAGRO</span>
-              <span className="block text-[10px] uppercase tracking-[0.35em] text-muted-foreground">Global Export</span>
+              <span className="block text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
+                Global Export
+              </span>
             </span>
           </a>
           <nav className="hidden items-center gap-7 lg:flex">
             {d.nav.map((n) => (
-              <a key={n.id} href={`#${n.id}`} className="text-sm tracking-wide text-muted-foreground transition-colors hover:text-primary">{n.label}</a>
+              <a
+                key={n.id}
+                href={`#${n.id}`}
+                className="text-sm tracking-wide text-muted-foreground transition-colors hover:text-primary"
+              >
+                {n.label}
+              </a>
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <a href={`https://wa.me/${PHONES[0]!.wa}`} target="_blank" rel="noreferrer" className="lift hidden rounded-sm bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground sm:inline-block">
+            <a
+              href={`https://wa.me/${PHONES[0]!.wa}`}
+              target="_blank"
+              rel="noreferrer"
+              className="lift hidden rounded-sm bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground sm:inline-block"
+            >
               {d.key === "agro" ? "Contact Desk" : "WhatsApp Us"}
             </a>
-            <button aria-label="Open menu" onClick={() => setOpen(true)} className="grid h-11 w-11 place-items-center rounded-sm border text-foreground lg:hidden">
+            <button
+              aria-label="Open menu"
+              onClick={() => setOpen(true)}
+              className="grid h-11 w-11 place-items-center rounded-sm border text-foreground lg:hidden"
+            >
               <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
       </header>
-      <div className={`fixed inset-0 z-50 bg-overlay backdrop-blur-xl transition-opacity duration-500 lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}>
-        <button aria-label="Close menu" onClick={() => setOpen(false)} className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-sm border">
+      <div
+        className={`fixed inset-0 z-50 bg-overlay backdrop-blur-xl transition-opacity duration-500 lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      >
+        <button
+          aria-label="Close menu"
+          onClick={() => setOpen(false)}
+          className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-sm border"
+        >
           <X className="h-5 w-5" />
         </button>
         <nav className="flex h-full flex-col items-center justify-center gap-6">
           {d.nav.map((n, i) => (
-            <a key={n.id} href={`#${n.id}`} onClick={() => setOpen(false)}
+            <a
+              key={n.id}
+              href={`#${n.id}`}
+              onClick={() => setOpen(false)}
               style={{ transitionDelay: open ? `${i * 60}ms` : "0ms" }}
-              className={`font-display text-2xl tracking-[0.15em] transition-all duration-500 hover:text-primary ${open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
+              className={`font-display text-2xl tracking-[0.15em] transition-all duration-500 hover:text-primary ${open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+            >
               {n.label}
             </a>
           ))}
-          <Link to={d.switchTo} className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-primary">{d.switchLabel} ↗</Link>
+          <Link
+            to={d.switchTo}
+            className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-primary"
+          >
+            {d.switchLabel} ↗
+          </Link>
         </nav>
       </div>
     </>
@@ -101,16 +174,24 @@ function Hero({ d }: { d: Division }) {
       <div className="mx-auto max-w-7xl px-4 py-24 sm:py-32 lg:py-40">
         <p className="mb-6 text-xs uppercase tracking-[0.3em] text-sand">{d.hero.eyebrow}</p>
         <h1 className="max-w-3xl font-display text-4xl leading-[1.1] sm:text-6xl lg:text-7xl">
-          {d.hero.lines[0]}<br />
-          <span className="font-serif italic text-gradient-gold">{d.hero.lines[1]}</span> {d.hero.lines[2]}
+          {d.hero.lines[0]}
+          <br />
+          <span className="font-serif italic text-gradient-gold">{d.hero.lines[1]}</span>{" "}
+          {d.hero.lines[2]}
         </h1>
         <p className="mt-6 font-serif text-lg tracking-[0.2em] text-primary">✦ {d.hero.tag} ✦</p>
         <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">{d.hero.body}</p>
         <div className="mt-8 flex flex-wrap gap-4">
-          <a href="#inquiry" className="lift rounded-sm bg-gradient-gold px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground">
+          <a
+            href="#inquiry"
+            className="lift rounded-sm bg-gradient-gold px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground"
+          >
             {d.key === "agro" ? "Submit B2B Inquiry" : "Inquire Now"}
           </a>
-          <a href="#collections" className="lift rounded-sm border border-primary/50 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-foreground">
+          <a
+            href="#collections"
+            className="lift rounded-sm border border-primary/50 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-foreground"
+          >
             {d.key === "agro" ? "View Specifications" : "View Collections"}
           </a>
         </div>
@@ -126,7 +207,9 @@ function Hero({ d }: { d: Division }) {
       <div className="overflow-hidden border-y bg-card py-4">
         <div className="flex w-max animate-marquee gap-12 whitespace-nowrap">
           {[...d.marquee, ...d.marquee, ...d.marquee, ...d.marquee].map((m, i) => (
-            <span key={i} className="font-serif text-lg tracking-widest text-sand">✦ {m}</span>
+            <span key={i} className="font-serif text-lg tracking-widest text-sand">
+              ✦ {m}
+            </span>
           ))}
         </div>
       </div>
@@ -139,7 +222,12 @@ function About({ d }: { d: Division }) {
     <section id="about" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div className="relative">
-          <img src={d.about.img} alt="" className="aspect-[4/5] w-full rounded-sm object-cover" loading="lazy" />
+          <img
+            src={d.about.img}
+            alt=""
+            className="aspect-4/5 w-full rounded-sm object-cover"
+            loading="lazy"
+          />
           <div className="absolute -bottom-6 right-4 rounded-sm bg-gradient-gold px-6 py-5 text-primary-foreground shadow-glow sm:-right-6">
             <p className="font-display text-4xl">1+</p>
             <p className="text-xs uppercase tracking-widest">{d.about.years}</p>
@@ -148,12 +236,17 @@ function About({ d }: { d: Division }) {
         <div className="min-w-0">
           <Eyebrow>{d.about.eyebrow}</Eyebrow>
           <h2 className="font-display text-3xl sm:text-5xl">
-            {d.about.title[0]} <span className="font-serif italic text-gradient-gold">{d.about.title[1]}</span> {d.about.title[2]}
+            {d.about.title[0]}{" "}
+            <span className="font-serif italic text-gradient-gold">{d.about.title[1]}</span>{" "}
+            {d.about.title[2]}
           </h2>
           <p className="mt-6 leading-relaxed text-muted-foreground">{d.about.body}</p>
           <ul className="mt-8 grid gap-3 sm:grid-cols-2">
             {d.about.points.map((p) => (
-              <li key={p} className="flex items-center gap-3 text-sm"><span className="text-primary">◆</span>{p}</li>
+              <li key={p} className="flex items-center gap-3 text-sm">
+                <span className="text-primary">◆</span>
+                {p}
+              </li>
             ))}
           </ul>
           <div className="mt-8 inline-flex flex-wrap items-center gap-3 rounded-sm border px-5 py-3 text-xs tracking-widest">
@@ -176,33 +269,66 @@ function CertModal({ cert, onClose }: { cert: Cert | null; onClose: () => void }
   if (!cert) return null;
   const isPdf = cert.file.endsWith(".pdf");
   return (
-    <div className="secure-zone fixed inset-0 z-50 grid place-items-center bg-overlay p-3 backdrop-blur-md sm:p-6" onClick={onClose} onContextMenu={(e) => e.preventDefault()}>
-      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-sm border bg-card select-none" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="secure-zone fixed inset-0 z-50 grid place-items-center bg-overlay p-3 backdrop-blur-md sm:p-6"
+      onClick={onClose}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      <div
+        className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-sm border bg-card select-none"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between gap-3 border-b px-5 py-3">
           <span className="flex min-w-0 items-center gap-2 text-xs uppercase tracking-widest text-primary">
-            <ShieldCheck className="h-4 w-4 shrink-0" /> <span className="truncate">Secured Corporate Record (View Only)</span>
+            <ShieldCheck className="h-4 w-4 shrink-0" />{" "}
+            <span className="truncate">Secured Corporate Record (View Only)</span>
           </span>
-          <button aria-label="Close" onClick={onClose} className="grid h-9 w-9 shrink-0 place-items-center rounded-sm border"><X className="h-4 w-4" /></button>
+          <button
+            aria-label="Close"
+            onClick={onClose}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-sm border"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
         <div className="grid min-h-0 flex-1 overflow-y-auto md:grid-cols-[1.3fr_1fr]">
           <div className="relative min-h-[50vh] bg-muted">
             {isPdf ? (
-              <iframe title={cert.title} src={`${cert.file}#toolbar=0&navpanes=0&view=FitH`} className="secure-media absolute inset-0 h-full w-full" />
+              <iframe
+                title={cert.title}
+                src={`${cert.file}#toolbar=0&navpanes=0&view=FitH`}
+                className="secure-media absolute inset-0 h-full w-full"
+              />
             ) : (
-              <img src={cert.file} alt={cert.title} draggable={false} className="secure-media absolute inset-0 h-full w-full object-contain p-4" />
+              <img
+                src={cert.file}
+                alt={cert.title}
+                draggable={false}
+                className="secure-media absolute inset-0 h-full w-full object-contain p-4"
+              />
             )}
             <div className="absolute inset-0" onContextMenu={(e) => e.preventDefault()} />
           </div>
           <div className="space-y-4 p-6 text-sm">
             <h3 className="font-display text-xl">{cert.title}</h3>
             <p className="text-muted-foreground">{cert.issuer}</p>
-            {[["License Number", cert.regId], ["Status", cert.status], ["Authorized Signatory", cert.proprietor], ["Registered", cert.state], ["Date of Issue", cert.date]].map(([k, v]) => (
+            {[
+              ["License Number", cert.regId],
+              ["Status", cert.status],
+              ["Authorized Signatory", cert.proprietor],
+              ["Registered", cert.state],
+              ["Date of Issue", cert.date],
+            ].map(([k, v]) => (
               <div key={k} className="flex flex-wrap justify-between gap-2 border-b pb-2">
-                <span className="text-muted-foreground">{k}</span><span className="font-semibold text-sand">{v}</span>
+                <span className="text-muted-foreground">{k}</span>
+                <span className="font-semibold text-sand">{v}</span>
               </div>
             ))}
             <p className="leading-relaxed text-muted-foreground">{cert.desc}</p>
-            <a href={`mailto:${EMAIL}?subject=${encodeURIComponent("Verified copy request: " + cert.title)}`} className="lift block rounded-sm bg-gradient-gold px-5 py-3 text-center font-semibold text-primary-foreground">
+            <a
+              href={`mailto:${EMAIL}?subject=${encodeURIComponent("Verified copy request: " + cert.title)}`}
+              className="lift block rounded-sm bg-gradient-gold px-5 py-3 text-center font-semibold text-primary-foreground"
+            >
               Request verified copy
             </a>
           </div>
@@ -219,17 +345,35 @@ function Credentials({ d }: { d: Division }) {
       <div className="mx-auto max-w-7xl px-4">
         <div className="mx-auto max-w-2xl text-center">
           <Eyebrow>{d.key === "agro" ? "Fully Compliant Exporter" : "Trust & Legality"}</Eyebrow>
-          <h2 className="font-display text-3xl sm:text-5xl">Corporate <span className="font-serif italic text-gradient-gold">Credentials</span></h2>
+          <h2 className="font-display text-3xl sm:text-5xl">
+            Corporate <span className="font-serif italic text-gradient-gold">Credentials</span>
+          </h2>
           <p className="mt-4 text-muted-foreground">{d.credBody}</p>
         </div>
-        <div className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        <div className="mt-12 grid gap-6 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
           {CERTS.map((c) => (
-            <button key={c.title} onClick={() => setCert(c)} className="lift rounded-sm border bg-background p-6 text-left">
+            <button
+              key={c.title}
+              onClick={() => setCert(c)}
+              className="lift rounded-sm border bg-background p-6 text-left"
+            >
               <span className="text-3xl">{c.icon}</span>
               <h3 className="mt-4 font-display text-lg">{c.short}</h3>
               <p className="text-xs uppercase tracking-widest text-primary">{c.issuerShort}</p>
+              <p className="mt-2 wrap-break-word text-xs font-semibold text-sand">
+                {c.short === "GST Certificate"
+                  ? "GSTIN"
+                  : c.short === "Import Export Code"
+                    ? "IEC No."
+                    : c.short === "FIEO RCMC"
+                      ? "RCMC No."
+                      : "Certificate No."}
+                : {c.regId}
+              </p>
               <p className="mt-3 text-sm text-muted-foreground">{c.blurb}</p>
-              <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">Verify Credentials <ArrowUpRight className="h-4 w-4" /></span>
+              <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                Verify Credentials <ArrowUpRight className="h-4 w-4" />
+              </span>
             </button>
           ))}
         </div>
@@ -239,38 +383,216 @@ function Credentials({ d }: { d: Division }) {
   );
 }
 
+function ProductDetailsModal({
+  product,
+  onClose,
+}: {
+  product: Product | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!product) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [product, onClose]);
+  if (!product) return null;
+  const details = getProductDetails(product.name);
+  return (
+    <div
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 p-3 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${product.name} details`}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-sm border bg-background shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close product details"
+          className="absolute right-3 top-3 z-10 rounded-full border bg-background p-2"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <div className="grid md:grid-cols-2">
+          <div className="min-h-64 bg-muted sm:min-h-96">
+            <img
+              src={product.img}
+              alt={product.name}
+              className="h-full max-h-[55vh] w-full object-cover md:max-h-none"
+            />
+          </div>
+          <div className="p-5 sm:p-8">
+            <p className="text-xs uppercase tracking-[0.2em] text-primary">{product.label}</p>
+            <h3 className="mt-2 pr-8 font-display text-2xl sm:text-3xl">{product.name}</h3>
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">{details.description}</p>
+            <div className="mt-5 divide-y rounded-sm border">
+              {details.specifications.map(([label, value]) => (
+                <div
+                  key={label}
+                  className="grid grid-cols-[minmax(6rem,0.8fr)_1.2fr] gap-3 px-3 py-2.5 text-sm sm:px-4"
+                >
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="wrap-break-word font-medium">{value}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Specifications and availability should be confirmed for the selected lot/design before
+              ordering.
+            </p>
+            <a
+              href="#inquiry"
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent("goldagro:product-selected", { detail: product.name }),
+                );
+                onClose();
+              }}
+              className="lift mt-6 block rounded-sm bg-gradient-gold px-5 py-3 text-center text-sm font-semibold text-primary-foreground"
+            >
+              Inquire About This Product
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Collections({ d }: { d: Division }) {
   const [tab, setTab] = useState(d.tabs[0]!.id);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const items = d.products.filter((p) => p.cat === tab);
   return (
     <section id="collections" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
       <div className="text-center">
         <Eyebrow>{d.key === "agro" ? "Global Food Standard" : "Exclusive Range"}</Eyebrow>
-        <h2 className="font-display text-3xl sm:text-5xl">Our {d.collectionsTitle[0]} <span className="font-serif italic text-gradient-gold">{d.collectionsTitle[1]}</span></h2>
+        <h2 className="font-display text-3xl sm:text-5xl">
+          Our {d.collectionsTitle[0]}{" "}
+          <span className="font-serif italic text-gradient-gold">{d.collectionsTitle[1]}</span>
+        </h2>
       </div>
       <div className="no-scrollbar -mx-4 mt-10 overflow-x-auto px-4">
         <div className="mx-auto flex w-max gap-3">
           {d.tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className={`whitespace-nowrap rounded-sm border px-6 py-3 text-sm uppercase tracking-widest transition-all duration-500 ${tab === t.id ? "border-transparent bg-gradient-gold text-primary-foreground shadow-glow" : "text-muted-foreground hover:border-primary hover:text-foreground"}`}>
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`whitespace-nowrap rounded-sm border px-6 py-3 text-sm uppercase tracking-widest transition-all duration-500 ${tab === t.id ? "border-transparent bg-gradient-gold text-primary-foreground shadow-glow" : "text-muted-foreground hover:border-primary hover:text-foreground"}`}
+            >
               {t.label}
             </button>
           ))}
         </div>
       </div>
-      <div className="mt-10 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))]">
-        {items.map((p) => (
-          <a key={p.img} href="#inquiry" className="lift group overflow-hidden rounded-sm border bg-card">
+      <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-6">
+        {items.map((product) => (
+          <button
+            key={product.img}
+            type="button"
+            onClick={() => setSelectedProduct(product)}
+            className="lift group overflow-hidden rounded-sm border bg-card text-left focus-visible:outline-2 focus-visible:outline-primary"
+          >
             <div className="aspect-square overflow-hidden bg-muted">
-              <img src={p.img} alt={p.name} loading="lazy" draggable={false} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img
+                src={product.img}
+                alt={product.name}
+                loading="lazy"
+                draggable={false}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
             </div>
             <div className="p-5">
-              <p className="text-xs uppercase tracking-widest text-primary">{p.label}</p>
-              <h3 className="mt-2 font-serif text-xl">{p.name}</h3>
-              <p className="mt-3 text-[11px] italic text-muted-foreground">*This image is for illustration purpose only</p>
+              <p className="text-xs uppercase tracking-widest text-primary">{product.label}</p>
+              <h3 className="mt-2 font-serif text-xl">{product.name}</h3>
+              <p className="mt-3 text-xs text-muted-foreground">View product photo & details ↗</p>
+              <p className="mt-2 text-[11px] italic text-muted-foreground">
+                *This image is for illustration purpose only
+              </p>
             </div>
-          </a>
+          </button>
         ))}
+      </div>
+      <ProductDetailsModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+    </section>
+  );
+}
+
+function BuyerHighlights() {
+  return (
+    <section className="border-y bg-card py-12 sm:py-16">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4">
+        {TRUST_HIGHLIGHTS.map((item) => (
+          <div key={item.title} className="lift rounded-sm border bg-background p-5 sm:p-6">
+            <span className="text-3xl" aria-hidden="true">
+              {item.icon}
+            </span>
+            <h3 className="mt-3 font-display text-lg">{item.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OrderProcess() {
+  return (
+    <section id="process" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
+      <div className="mx-auto max-w-3xl text-center">
+        <Eyebrow>From Inquiry to Shipment</Eyebrow>
+        <h2 className="font-display text-3xl sm:text-5xl">
+          How an <span className="font-serif italic text-gradient-gold">Order Works</span>
+        </h2>
+        <p className="mt-4 text-muted-foreground">Simple steps from inquiry to delivery.</p>
+      </div>
+      <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {ORDER_STEPS.map((step, index) => (
+          <li key={step.title} className="lift rounded-sm border bg-card p-5 sm:p-6">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-gold font-semibold text-primary-foreground">
+              {index + 1}
+            </span>
+            <h3 className="mt-4 font-display text-lg">{step.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.body}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function BuyerFAQ() {
+  return (
+    <section id="faq" className="border-y bg-card py-20 sm:py-28">
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="text-center">
+          <Eyebrow>Buyer Information</Eyebrow>
+          <h2 className="font-display text-3xl sm:text-5xl">
+            Buyer <span className="font-serif italic text-gradient-gold">FAQ</span>
+          </h2>
+        </div>
+        <div className="mt-10 space-y-3">
+          {BUYER_FAQ.map((item) => (
+            <details
+              key={item.question}
+              className="group rounded-sm border bg-background p-4 sm:p-5"
+            >
+              <summary className="cursor-pointer list-none pr-6 font-semibold marker:hidden">
+                <span className="flex items-center justify-between gap-3">
+                  {item.question}
+                  <span className="text-primary transition-transform group-open:rotate-45">＋</span>
+                </span>
+              </summary>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -282,11 +604,17 @@ function Why({ d }: { d: Division }) {
       <div className="mx-auto max-w-7xl px-4">
         <div className="text-center">
           <Eyebrow>{d.key === "agro" ? "Global Supply Standard" : "Our Promise"}</Eyebrow>
-          <h2 className="font-display text-3xl sm:text-5xl">Why Choose <span className="text-gradient-gold">GOLDAGRO</span>?</h2>
+          <h2 className="font-display text-3xl sm:text-5xl">
+            Why Choose <span className="text-gradient-gold">GOLDAGRO</span>?
+          </h2>
         </div>
-        <div className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))]">
+        <div className="mt-12 grid gap-6 grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))]">
           {d.why.map((w) => (
-            <div key={w.title} tabIndex={0} className="lift rounded-sm border bg-background p-8 text-center">
+            <div
+              key={w.title}
+              tabIndex={0}
+              className="lift rounded-sm border bg-background p-8 text-center"
+            >
               <span className="text-4xl">{w.icon}</span>
               <h3 className="mt-4 font-display text-xl">{w.title}</h3>
               <p className="mt-3 text-sm text-muted-foreground">{w.body}</p>
@@ -304,18 +632,51 @@ function CrossDivision() {
       <div className="grid gap-10 rounded-sm border bg-card p-8 sm:p-12 lg:grid-cols-2">
         <div>
           <Eyebrow>Corporate Extension</Eyebrow>
-          <h3 className="font-display text-3xl">GOLDAGRO <span className="font-serif italic text-gradient-gold">Agro-Exports</span> Division</h3>
-          <p className="mt-4 text-muted-foreground">Beyond imitation jewellery, GOLDAGRO exports premium agro commodities directly from harvesting points across India, under strictly regulated phytosanitary standards.</p>
+          <h3 className="font-display text-3xl">
+            GOLDAGRO <span className="font-serif italic text-gradient-gold">Agro-Exports</span>{" "}
+            Division
+          </h3>
+          <p className="mt-4 text-muted-foreground">
+            Beyond imitation jewellery, GOLDAGRO exports premium agro commodities directly from
+            harvesting points across India, under strictly regulated phytosanitary standards.
+          </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/" className="lift rounded-sm bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground">View Agro Portfolio</Link>
-            <a href={`https://wa.me/${PHONES[0]!.wa}`} target="_blank" rel="noreferrer" className="lift rounded-sm border px-6 py-3 text-sm font-semibold">WhatsApp Agro Dept.</a>
+            <Link
+              to="/"
+              className="lift rounded-sm bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground"
+            >
+              View Agro Portfolio
+            </Link>
+            <a
+              href={`https://wa.me/${PHONES[0]!.wa}`}
+              target="_blank"
+              rel="noreferrer"
+              className="lift rounded-sm border px-6 py-3 text-sm font-semibold"
+            >
+              WhatsApp Agro Dept.
+            </a>
           </div>
         </div>
         <div className="grid gap-4">
-          {[["🌶️", "Premium Spices", "High-grade Turmeric, Cardamom, and Black Pepper from Indian estates."], ["🥭", "Exotic Fruits", "Mangoes, pomegranates, and grapes in cold-chain packs."], ["🧅", "Fresh Vegetables", "Wholesale onions, potatoes, and daily fresh crops for global docks."]].map(([i, t, b]) => (
+          {[
+            [
+              "🌶️",
+              "Premium Spices",
+              "High-grade Turmeric, Cardamom, and Black Pepper from Indian estates.",
+            ],
+            ["🥭", "Exotic Fruits", "Mangoes, pomegranates, and grapes in cold-chain packs."],
+            [
+              "🧅",
+              "Fresh Vegetables",
+              "Wholesale onions, potatoes, and daily fresh crops for global docks.",
+            ],
+          ].map(([i, t, b]) => (
             <div key={t} className="lift flex gap-4 rounded-sm border bg-background p-4">
               <span className="text-2xl">{i}</span>
-              <div><h4 className="font-semibold">{t}</h4><p className="text-sm text-muted-foreground">{b}</p></div>
+              <div>
+                <h4 className="font-semibold">{t}</h4>
+                <p className="text-sm text-muted-foreground">{b}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -324,49 +685,304 @@ function CrossDivision() {
   );
 }
 
-const field = "w-full rounded-sm border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary";
+const field =
+  "w-full min-w-0 rounded-sm border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary";
+
+const COUNTRY_OPTIONS = [
+  { name: "India", dial: "+91", postal: "^[1-9][0-9]{5}$", phoneMin: 10, phoneMax: 10 },
+  {
+    name: "United States",
+    dial: "+1",
+    postal: "^[0-9]{5}(-[0-9]{4})?$",
+    phoneMin: 10,
+    phoneMax: 10,
+  },
+  {
+    name: "Canada",
+    dial: "+1",
+    postal: "^[A-Za-z][0-9][A-Za-z][ -]?[0-9][A-Za-z][0-9]$",
+    phoneMin: 10,
+    phoneMax: 10,
+  },
+  {
+    name: "United Kingdom",
+    dial: "+44",
+    postal: "^[A-Za-z]{1,2}[0-9][A-Za-z0-9]? ?[0-9][A-Za-z]{2}$",
+    phoneMin: 9,
+    phoneMax: 10,
+  },
+  { name: "United Arab Emirates", dial: "+971", postal: "^.{0,20}$", phoneMin: 9, phoneMax: 9 },
+  { name: "Saudi Arabia", dial: "+966", postal: "^[0-9]{5}$", phoneMin: 9, phoneMax: 9 },
+  { name: "Australia", dial: "+61", postal: "^[0-9]{4}$", phoneMin: 9, phoneMax: 9 },
+  { name: "Singapore", dial: "+65", postal: "^[0-9]{6}$", phoneMin: 8, phoneMax: 8 },
+  { name: "Germany", dial: "+49", postal: "^[0-9]{5}$", phoneMin: 7, phoneMax: 12 },
+  { name: "France", dial: "+33", postal: "^[0-9]{5}$", phoneMin: 9, phoneMax: 9 },
+  { name: "Japan", dial: "+81", postal: "^[0-9]{3}-?[0-9]{4}$", phoneMin: 9, phoneMax: 10 },
+  { name: "China", dial: "+86", postal: "^[0-9]{6}$", phoneMin: 11, phoneMax: 11 },
+  { name: "South Africa", dial: "+27", postal: "^[0-9]{4}$", phoneMin: 9, phoneMax: 9 },
+  { name: "Other country", dial: "+", postal: "^.{2,20}$", phoneMin: 7, phoneMax: 15 },
+];
 
 function Inquiry({ d }: { d: Division }) {
-  const [f, setF] = useState({ name: "", email: "", phone: "", cat: d.inquiry.categories[0]!, rep: "0", msg: "" });
+  const [f, setF] = useState({
+    name: "",
+    company: "",
+    email: "",
+    dial: "+91",
+    phone: "",
+    country: "India",
+    postalCode: "",
+    port: "",
+    cat: d.inquiry.categories[0]!,
+    quantity: "",
+    msg: "",
+  });
+  const selectedCountry = COUNTRY_OPTIONS.find((c) => c.name === f.country) ?? COUNTRY_OPTIONS[0]!;
+  useEffect(() => {
+    const onProductSelected = (event: Event) => {
+      const productName = (event as CustomEvent<string>).detail;
+      if (productName) setF((prev) => ({ ...prev, cat: productName }));
+    };
+    window.addEventListener("goldagro:product-selected", onProductSelected);
+    return () => window.removeEventListener("goldagro:product-selected", onProductSelected);
+  }, []);
   const body = () =>
-    `Hello GOLDAGRO,\n\nName: ${f.name}\nEmail: ${f.email}\nPhone: ${f.phone}\nCategory: ${f.cat}\n\n${f.msg}`;
-  const valid = () => {
-    if (!f.name.trim() || !f.email.includes("@")) {
-      toast.error("Please add your name and a valid email.");
+    `GOLDAGRO GLOBAL EXPORT — BUSINESS INQUIRY\n\nFull name: ${f.name.trim()}\nCompany: ${f.company.trim() || "Not provided"}\nEmail: ${f.email.trim()}\nPhone / WhatsApp: ${f.dial} ${f.phone.trim()}\nCountry: ${f.country}\nPostal / PIN code: ${f.postalCode.trim()}\nDestination port: ${f.port.trim()}\nProduct: ${f.cat}\nQuantity: ${f.quantity.trim() || "Please advise"}\nAdditional requirements: ${f.msg.trim() || "None provided"}\n\nPlease share the relevant specifications and quotation.\nThank you.`;
+  const validate = () => {
+    const email = f.email.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email);
+    const digits = f.phone.replace(/\D/g, "");
+    const phoneValid =
+      digits.length >= selectedCountry.phoneMin &&
+      digits.length <= selectedCountry.phoneMax &&
+      !/^([0-9])\1+$/.test(digits) &&
+      !/^0+$/.test(digits);
+    let postalValid = true;
+    if (selectedCountry.name !== "United Arab Emirates" && selectedCountry.name !== "Other country")
+      postalValid = new RegExp(selectedCountry.postal, "i").test(f.postalCode.trim());
+    else if (selectedCountry.name === "Other country")
+      postalValid = f.postalCode.trim().length >= 2 && !/^([0-9])\1+$/.test(f.postalCode.trim());
+    if (!f.name.trim() || !emailValid || !phoneValid || !postalValid || !f.port.trim() || !f.cat) {
+      toast.error("Please check the required fields.", {
+        description: !f.name.trim()
+          ? "Enter your full name."
+          : !emailValid
+            ? "Enter a valid email address (for example, name@company.com)."
+            : !phoneValid
+              ? `Enter a valid ${selectedCountry.name} phone number without repeated placeholder digits.`
+              : !postalValid
+                ? `Enter a valid postal / PIN code for ${selectedCountry.name}.`
+                : "Enter your destination port and select a product.",
+      });
       return false;
     }
     return true;
   };
   const viaWa = (e: FormEvent) => {
     e.preventDefault();
-    if (!valid()) return;
-    window.open(`https://wa.me/${PHONES[Number(f.rep)]!.wa}?text=${encodeURIComponent(body())}`, "_blank");
+    if (!validate()) return;
+    const wa = PHONES[0]!.wa;
+    const url = `https://wa.me/${wa}?text=${encodeURIComponent(body())}`;
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) window.location.href = url;
   };
-  const viaMail = () => {
-    if (!valid()) return;
-    window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(`${d.inquiry.title} — ${f.cat}`)}&body=${encodeURIComponent(body())}`;
+  const viaGmail = () => {
+    if (!validate()) return;
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL)}&su=${encodeURIComponent(`${d.inquiry.title} — ${f.cat}`)}&body=${encodeURIComponent(body())}`;
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) window.location.href = url;
   };
-  const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
+  const set = (k: keyof typeof f) => (e: { target: { value: string } }) =>
+    setF((prev) => ({ ...prev, [k]: e.target.value }));
   return (
     <section id="inquiry" className="mx-auto max-w-4xl px-4 py-20 sm:py-28">
       <div className="text-center">
         <Eyebrow>{d.key === "agro" ? "Global Trade Request" : "Business Proposal"}</Eyebrow>
         <h2 className="font-display text-3xl sm:text-5xl">{d.inquiry.title}</h2>
         <p className="mt-4 text-muted-foreground">{d.inquiry.body}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Complete the form, then review and send your inquiry through WhatsApp or Gmail.
+        </p>
       </div>
-      <form onSubmit={viaWa} className="mt-10 grid gap-4 rounded-sm border bg-card p-6 sm:grid-cols-2 sm:p-10">
-        <input className={field} placeholder="Full Name" value={f.name} onChange={set("name")} maxLength={100} />
-        <input className={field} type="email" placeholder="Business Email" value={f.email} onChange={set("email")} maxLength={255} />
-        <input className={field} placeholder="Phone / WhatsApp" value={f.phone} onChange={set("phone")} maxLength={30} />
-        <select className={field} value={f.cat} onChange={set("cat")}>
-          {d.inquiry.categories.map((c) => <option key={c}>{c}</option>)}
-        </select>
-        <select className={`${field} sm:col-span-2`} value={f.rep} onChange={set("rep")}>
-          {d.inquiry.reps.map((r, i) => <option key={r} value={i}>{r} ({PHONES[i]?.label})</option>)}
-        </select>
-        <textarea className={`${field} min-h-32 sm:col-span-2`} placeholder={d.key === "agro" ? "Transit volume requirements" : "Business requirements"} value={f.msg} onChange={set("msg")} maxLength={1500} />
-        <button type="submit" className="lift rounded-sm bg-gradient-gold px-6 py-3.5 font-semibold text-primary-foreground">📱 Submit via WhatsApp</button>
-        <button type="button" onClick={viaMail} className="lift rounded-sm border px-6 py-3.5 font-semibold">✉️ Submit via Email</button>
+      <form
+        onSubmit={viaWa}
+        className="mt-10 grid min-w-0 gap-4 rounded-sm border bg-card p-4 sm:grid-cols-2 sm:p-10"
+        noValidate
+      >
+        <label className="grid gap-2 text-sm">
+          Full name{" "}
+          <input
+            className={field}
+            autoComplete="name"
+            placeholder="Your full name"
+            value={f.name}
+            onChange={set("name")}
+            maxLength={100}
+            required
+          />
+        </label>
+        <label className="grid gap-2 text-sm">
+          Company name (optional){" "}
+          <input
+            className={field}
+            autoComplete="organization"
+            placeholder="Company name"
+            value={f.company}
+            onChange={set("company")}
+            maxLength={120}
+          />
+        </label>
+        <label className="grid gap-2 text-sm">
+          Business email{" "}
+          <input
+            className={field}
+            type="email"
+            autoComplete="email"
+            placeholder="name@company.com"
+            value={f.email}
+            onChange={set("email")}
+            maxLength={254}
+            required
+          />
+        </label>
+        <div className="grid gap-2 text-sm">
+          <label htmlFor="inquiry-phone">Phone / WhatsApp</label>
+          <div className="grid grid-cols-[minmax(6rem,0.75fr)_minmax(0,1.25fr)] gap-2">
+            <select
+              className={field}
+              aria-label="Country calling code"
+              value={f.country}
+              onChange={(e) => {
+                const c = COUNTRY_OPTIONS.find((x) => x.name === e.target.value)!;
+                setF((prev) => ({ ...prev, country: c.name, dial: c.dial }));
+              }}
+            >
+              <option value="" disabled>
+                Select country
+              </option>
+              {COUNTRY_OPTIONS.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({c.dial})
+                </option>
+              ))}
+            </select>
+            <input
+              id="inquiry-phone"
+              className={field}
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder="Phone number"
+              value={f.phone}
+              onChange={set("phone")}
+              maxLength={20}
+              required
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Enter the national number without the country code; the calling code is added
+            separately.
+          </p>
+        </div>
+        <label className="grid gap-2 text-sm">
+          Country{" "}
+          <select
+            className={field}
+            value={f.country}
+            onChange={(e) => {
+              const c = COUNTRY_OPTIONS.find((x) => x.name === e.target.value)!;
+              setF((prev) => ({ ...prev, country: c.name, dial: c.dial }));
+            }}
+            required
+          >
+            {COUNTRY_OPTIONS.map((c) => (
+              <option key={c.name} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-2 text-sm">
+          PIN / postal code{" "}
+          <input
+            className={field}
+            autoComplete="postal-code"
+            placeholder="Postal / PIN code"
+            value={f.postalCode}
+            onChange={set("postalCode")}
+            maxLength={20}
+            required
+          />
+        </label>
+        <label className="grid gap-2 text-sm">
+          Destination port{" "}
+          <input
+            className={field}
+            placeholder="Destination port"
+            value={f.port}
+            onChange={set("port")}
+            maxLength={120}
+            required
+          />
+        </label>
+        <label className="grid gap-2 text-sm">
+          Product / category{" "}
+          <select className={field} value={f.cat} onChange={set("cat")} required>
+            {d.inquiry.categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+            {d.products.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-2 text-sm sm:col-span-2">
+          Quantity / order size{" "}
+          <input
+            className={field}
+            placeholder="e.g. 1 x 20ft container or required quantity"
+            value={f.quantity}
+            onChange={set("quantity")}
+            maxLength={150}
+          />
+        </label>
+        <label className="grid gap-2 text-sm sm:col-span-2">
+          Additional requirements{" "}
+          <textarea
+            className={`${field} min-h-32 resize-y`}
+            placeholder={
+              d.key === "agro"
+                ? "Specifications, grade, packaging, quantity or other details"
+                : "Designs, material, finish, quantity or other requirements"
+            }
+            value={f.msg}
+            onChange={set("msg")}
+            maxLength={1500}
+          />
+        </label>
+        <p className="text-xs leading-5 text-muted-foreground sm:col-span-2">
+          Your details are used to prepare this inquiry message. WhatsApp and Gmail will open with
+          the message filled in; you must press Send in that app. Format checks cannot confirm that
+          a phone number or postal code is active or belongs to you.
+        </p>
+        <button
+          type="submit"
+          className="lift flex min-w-0 items-center justify-center gap-2 rounded-sm bg-gradient-gold px-4 py-3.5 text-sm font-semibold text-primary-foreground sm:col-span-1"
+        >
+          <MessageCircle className="h-5 w-5 shrink-0" />
+          Send Inquiry via WhatsApp
+        </button>
+        <button
+          type="button"
+          onClick={viaGmail}
+          className="lift flex min-w-0 items-center justify-center gap-2 rounded-sm border px-4 py-3.5 text-sm font-semibold sm:col-span-1"
+        >
+          <Mail className="h-5 w-5 shrink-0" />
+          Send Inquiry via Gmail
+        </button>
       </form>
     </section>
   );
@@ -377,7 +993,11 @@ function Contact({ d }: { d: Division }) {
     { icon: MapPin, t: "Corporate Office", v: [ADDRESS] },
     { icon: Phone, t: "Operational Lines", v: PHONES.map((p) => p.label) },
     { icon: Mail, t: "Email Us", v: [EMAIL] },
-    { icon: Globe, t: "Global Export Services", v: ["Direct maritime dispatch from Mumbai customs ports"] },
+    {
+      icon: Globe,
+      t: "Global Export Services",
+      v: ["Direct maritime dispatch from Mumbai customs ports"],
+    },
   ];
   return (
     <section id="contact" className="border-t bg-card py-20 sm:py-28">
@@ -386,12 +1006,16 @@ function Contact({ d }: { d: Division }) {
           <Eyebrow>HQ Coordinate</Eyebrow>
           <h2 className="font-display text-3xl sm:text-5xl">{d.contactTitle}</h2>
         </div>
-        <div className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))]">
+        <div className="mt-12 grid gap-6 grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))]">
           {items.map(({ icon: I, t, v }) => (
             <div key={t} className="lift rounded-sm border bg-background p-6">
               <I className="h-6 w-6 text-primary" />
               <h3 className="mt-4 font-display text-lg">{t}</h3>
-              {v.map((x) => <p key={x} className="mt-2 break-words text-sm text-muted-foreground">{x}</p>)}
+              {v.map((x) => (
+                <p key={x} className="mt-2 wrap-break-word text-sm text-muted-foreground">
+                  {x}
+                </p>
+              ))}
             </div>
           ))}
         </div>
@@ -409,14 +1033,29 @@ function Footer({ d }: { d: Division }) {
           <p className="mt-3 max-w-sm text-sm text-muted-foreground">{d.footerBlurb}</p>
         </div>
         <div className="grid gap-2 text-sm">
-          {d.nav.slice(0, 4).map((n) => <a key={n.id} href={`#${n.id}`} className="text-muted-foreground hover:text-primary">{n.label}</a>)}
+          {d.nav.slice(0, 4).map((n) => (
+            <a key={n.id} href={`#${n.id}`} className="text-muted-foreground hover:text-primary">
+              {n.label}
+            </a>
+          ))}
         </div>
         <div className="grid gap-2 text-sm">
-          <Link to={d.switchTo} className="text-primary">{d.key === "agro" ? "Jewellery Portfolio ↗" : "Agro Exports ↗"}</Link>
-          <a href={`https://wa.me/${PHONES[0]!.wa}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary">WhatsApp Desk</a>
+          <Link to={d.switchTo} className="text-primary">
+            {d.key === "agro" ? "Jewellery Portfolio ↗" : "Agro Exports ↗"}
+          </Link>
+          <a
+            href={`https://wa.me/${PHONES[0]!.wa}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-muted-foreground hover:text-primary"
+          >
+            WhatsApp Desk
+          </a>
         </div>
       </div>
-      <p className="mx-auto mt-10 max-w-7xl border-t pt-6 text-xs text-muted-foreground">© 2026 Goldagro Global Export. All Rights Reserved.</p>
+      <p className="mx-auto mt-10 max-w-7xl border-t pt-6 text-xs text-muted-foreground">
+        © 2026 Goldagro Global Export. All Rights Reserved.
+      </p>
     </footer>
   );
 }
@@ -430,13 +1069,26 @@ export function DivisionPage({ d }: { d: Division }) {
         <Hero d={d} />
         <About d={d} />
         <Credentials d={d} />
+        <BuyerHighlights />
         <Collections d={d} />
+        <OrderProcess />
+        <BuyerFAQ />
         <Why d={d} />
         {d.key === "jewel" && <CrossDivision />}
         <Inquiry d={d} />
         <Contact d={d} />
       </main>
       <Footer d={d} />
+      <a
+        href={`https://wa.me/${PHONES[0]!.wa}?text=${encodeURIComponent("Hello GOLDAGRO, I would like to make a business inquiry.")}`}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat with GOLDAGRO on WhatsApp"
+        className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:bottom-6 sm:right-6"
+      >
+        <MessageCircle className="h-5 w-5" />
+        <span className="hidden sm:inline">WhatsApp</span>
+      </a>
       <Toaster position="top-center" theme="dark" richColors />
     </div>
   );
