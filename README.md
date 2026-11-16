@@ -1,6 +1,6 @@
 # Goldagro Shine
 
-https://github.com/ShaikhAhmed39/goldagro-portfolio
+https://github.com/ShaikhAhmed39/goldagro-shine
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.
@@ -16,3 +16,9 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## SEO configuration
+
+Set `VITE_SITE_URL` (for example `https://www.yourdomain.com`, no trailing slash) in your hosting
+environment. It enables canonical links, Open Graph URLs/images, JSON-LD URLs, `sitemap.xml` and
+the `Sitemap:` line in `robots.txt`. Without it those absolute-URL tags are skipped.

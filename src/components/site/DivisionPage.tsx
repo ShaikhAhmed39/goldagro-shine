@@ -14,6 +14,7 @@ import {
 import { toast, Toaster } from "sonner";
 import {
   ADDRESS,
+  ABOUT_FACTS,
   BUYER_FAQ,
   CERTS,
   EMAIL,
@@ -26,6 +27,17 @@ import {
   type Division,
   type Product,
 } from "@/lib/site-data";
+
+function useScrollLock(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [active]);
+}
 
 const SECURITY_MSG =
   "Security Protocol: Direct archiving, local printing, or devtools inspection of official enterprise credentials is fully restricted.";
@@ -58,7 +70,7 @@ function useSecurityShield() {
 
 function Eyebrow({ children }: { children: string }) {
   return (
-    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm sm:tracking-[0.25em]">
       ✦ {children}
     </p>
   );
@@ -66,20 +78,27 @@ function Eyebrow({ children }: { children: string }) {
 
 function Header({ d }: { d: Division }) {
   const [open, setOpen] = useState(false);
+  useScrollLock(open);
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
   return (
     <>
-      <div className="border-b bg-card px-4 py-2 text-[11px] tracking-[0.15em] sm:text-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
-          <span className="min-w-0 truncate uppercase text-muted-foreground">✦ {d.strip}</span>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:font-semibold focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
+      <div className="border-b bg-card px-4 py-2 text-xs tracking-[0.1em] sm:tracking-[0.15em]">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <span className="min-w-0 uppercase leading-snug text-muted-foreground">✦ {d.strip}</span>
           <Link
             to={d.switchTo}
-            className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary hover:text-primary-glow"
+            className="inline-flex min-h-8 shrink-0 items-center gap-1 font-semibold text-primary underline-offset-4 hover:text-primary-glow hover:underline"
           >
             {d.switchLabel} <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
@@ -97,17 +116,17 @@ function Header({ d }: { d: Division }) {
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-display text-lg tracking-[0.2em]">GOLDAGRO</span>
-              <span className="block text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
+              <span className="block text-xs uppercase tracking-[0.25em] text-muted-foreground">
                 Global Export
               </span>
             </span>
           </a>
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav aria-label="Primary" className="hidden items-center gap-7 lg:flex">
             {d.nav.map((n) => (
               <a
                 key={n.id}
                 href={`#${n.id}`}
-                className="text-sm tracking-wide text-muted-foreground transition-colors hover:text-primary"
+                className="py-2 text-sm font-medium tracking-wide text-muted-foreground transition-colors hover:text-primary"
               >
                 {n.label}
               </a>
@@ -118,14 +137,18 @@ function Header({ d }: { d: Division }) {
               href={`https://wa.me/${PHONES[0]!.wa}`}
               target="_blank"
               rel="noreferrer"
-              className="lift hidden rounded-sm bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground sm:inline-block"
+              className="btn btn-whatsapp btn-sm hidden sm:inline-flex"
             >
-              {d.key === "agro" ? "Contact Desk" : "WhatsApp Us"}
+              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              WhatsApp Us
             </a>
             <button
+              type="button"
               aria-label="Open menu"
+              aria-expanded={open}
+              aria-controls="mobile-menu"
               onClick={() => setOpen(true)}
-              className="grid h-11 w-11 place-items-center rounded-sm border text-foreground lg:hidden"
+              className="icon-btn lg:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -133,30 +156,49 @@ function Header({ d }: { d: Division }) {
         </div>
       </header>
       <div
-        className={`fixed inset-0 z-50 bg-overlay backdrop-blur-xl transition-opacity duration-500 lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        id="mobile-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        inert={!open}
+        className={`fixed inset-0 z-50 overflow-y-auto bg-overlay backdrop-blur-xl transition-opacity duration-300 lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
       >
         <button
+          type="button"
           aria-label="Close menu"
           onClick={() => setOpen(false)}
-          className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-sm border"
+          className="icon-btn absolute right-4 top-4"
         >
           <X className="h-5 w-5" />
         </button>
-        <nav className="flex h-full flex-col items-center justify-center gap-6">
+        <nav
+          aria-label="Mobile"
+          className="flex min-h-full flex-col items-center justify-center gap-5 px-6 py-20"
+        >
           {d.nav.map((n, i) => (
             <a
               key={n.id}
               href={`#${n.id}`}
               onClick={() => setOpen(false)}
               style={{ transitionDelay: open ? `${i * 60}ms` : "0ms" }}
-              className={`font-display text-2xl tracking-[0.15em] transition-all duration-500 hover:text-primary ${open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+              className={`py-1 font-display text-2xl tracking-[0.12em] transition-all duration-300 hover:text-primary ${open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
             >
               {n.label}
             </a>
           ))}
+          <a
+            href={`https://wa.me/${PHONES[0]!.wa}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-whatsapp mt-4 w-full max-w-xs"
+          >
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
+            WhatsApp Us
+          </a>
           <Link
             to={d.switchTo}
-            className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-primary"
+            onClick={() => setOpen(false)}
+            className="btn btn-outline w-full max-w-xs"
           >
             {d.switchLabel} ↗
           </Link>
@@ -169,45 +211,54 @@ function Header({ d }: { d: Division }) {
 function Hero({ d }: { d: Division }) {
   return (
     <section id="home" className="relative isolate overflow-hidden">
-      <img src={d.hero.img} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+      <img
+        src={d.hero.img}
+        alt=""
+        aria-hidden="true"
+        fetchPriority="high"
+        decoding="async"
+        className="absolute inset-0 -z-20 h-full w-full object-cover"
+      />
       <div className="absolute inset-0 -z-10 bg-gradient-hero" />
-      <div className="mx-auto max-w-7xl px-4 py-24 sm:py-32 lg:py-40">
-        <p className="mb-6 text-xs uppercase tracking-[0.3em] text-sand">{d.hero.eyebrow}</p>
-        <h1 className="max-w-3xl font-display text-4xl leading-[1.1] sm:text-6xl lg:text-7xl">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:py-28 lg:py-40">
+        <p className="mb-5 text-xs uppercase tracking-[0.2em] text-sand sm:text-sm sm:tracking-[0.25em]">
+          {d.hero.eyebrow}
+        </p>
+        <h1 className="max-w-3xl text-balance font-display text-[2rem] leading-[1.15] sm:text-6xl lg:text-7xl">
           {d.hero.lines[0]}
           <br />
           <span className="font-serif italic text-gradient-gold">{d.hero.lines[1]}</span>{" "}
           {d.hero.lines[2]}
         </h1>
-        <p className="mt-6 font-serif text-lg tracking-[0.2em] text-primary">✦ {d.hero.tag} ✦</p>
-        <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">{d.hero.body}</p>
-        <div className="mt-8 flex flex-wrap gap-4">
-          <a
-            href="#inquiry"
-            className="lift rounded-sm bg-gradient-gold px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground"
-          >
+        <p className="mt-6 font-serif text-xl font-semibold tracking-[0.12em] text-primary sm:text-2xl sm:tracking-[0.2em]">
+          ✦ {d.hero.tag} ✦
+        </p>
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-foreground/90 sm:text-lg">
+          {d.hero.body}
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+          <a href="#inquiry" className="btn btn-primary">
             {d.key === "agro" ? "Submit B2B Inquiry" : "Inquire Now"}
           </a>
-          <a
-            href="#collections"
-            className="lift rounded-sm border border-primary/50 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-foreground"
-          >
+          <a href="#collections" className="btn btn-outline">
             {d.key === "agro" ? "View Specifications" : "View Collections"}
           </a>
         </div>
-        <dl className="mt-14 grid max-w-lg grid-cols-3 gap-6 border-t pt-8">
+        <dl className="mt-12 grid max-w-lg grid-cols-3 gap-4 border-t pt-8 sm:mt-14 sm:gap-6">
           {d.hero.stats.map(([v, l]) => (
             <div key={l}>
               <dt className="font-display text-2xl text-primary sm:text-3xl">{v}</dt>
-              <dd className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">{l}</dd>
+              <dd className="mt-1 text-xs uppercase tracking-wider text-muted-foreground sm:text-sm">
+                {l}
+              </dd>
             </div>
           ))}
         </dl>
       </div>
       <div className="overflow-hidden border-y bg-card py-4">
-        <div className="flex w-max animate-marquee gap-12 whitespace-nowrap">
+        <div className="flex w-max animate-marquee gap-12 whitespace-nowrap" aria-hidden="true">
           {[...d.marquee, ...d.marquee, ...d.marquee, ...d.marquee].map((m, i) => (
-            <span key={i} className="font-serif text-lg tracking-widest text-sand">
+            <span key={i} className="font-serif text-lg font-semibold tracking-widest text-sand">
               ✦ {m}
             </span>
           ))}
@@ -219,37 +270,45 @@ function Hero({ d }: { d: Division }) {
 
 function About({ d }: { d: Division }) {
   return (
-    <section id="about" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
+    <section id="about" className="mx-auto max-w-7xl px-4 py-16 sm:py-28">
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div className="relative">
           <img
             src={d.about.img}
-            alt=""
+            alt={
+              d.key === "agro"
+                ? "Fresh pineapples sourced from Indian farms for export"
+                : "Bridal imitation jewellery set from the GOLDAGRO collection"
+            }
             className="aspect-4/5 w-full rounded-sm object-cover"
             loading="lazy"
           />
-          <div className="absolute -bottom-6 right-4 rounded-sm bg-gradient-gold px-6 py-5 text-primary-foreground shadow-glow sm:-right-6">
-            <p className="font-display text-4xl">1+</p>
-            <p className="text-xs uppercase tracking-widest">{d.about.years}</p>
+          <div className="absolute -bottom-6 right-4 rounded-sm bg-primary px-5 py-4 text-primary-foreground shadow-glow sm:-right-6 sm:px-6 sm:py-5">
+            <p className="font-display text-3xl sm:text-4xl">1+</p>
+            <p className="text-xs font-semibold uppercase tracking-wider">{d.about.years}</p>
           </div>
         </div>
         <div className="min-w-0">
           <Eyebrow>{d.about.eyebrow}</Eyebrow>
-          <h2 className="font-display text-3xl sm:text-5xl">
+          <h2 className="text-balance font-display text-3xl leading-tight sm:text-5xl">
             {d.about.title[0]}{" "}
             <span className="font-serif italic text-gradient-gold">{d.about.title[1]}</span>{" "}
             {d.about.title[2]}
           </h2>
-          <p className="mt-6 leading-relaxed text-muted-foreground">{d.about.body}</p>
+          <p className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {d.about.body}
+          </p>
           <ul className="mt-8 grid gap-3 sm:grid-cols-2">
             {d.about.points.map((p) => (
-              <li key={p} className="flex items-center gap-3 text-sm">
-                <span className="text-primary">◆</span>
+              <li key={p} className="flex items-center gap-3 text-base">
+                <span className="text-primary" aria-hidden="true">
+                  ◆
+                </span>
                 {p}
               </li>
             ))}
           </ul>
-          <div className="mt-8 inline-flex flex-wrap items-center gap-3 rounded-sm border px-5 py-3 text-xs tracking-widest">
+          <div className="mt-8 inline-flex flex-wrap items-center gap-3 rounded-sm border px-5 py-3 text-sm tracking-wider">
             <span className="text-muted-foreground">GST REGISTRATION</span>
             <span className="font-semibold text-primary">{GST}</span>
           </div>
@@ -266,10 +325,14 @@ function CertModal({ cert, onClose }: { cert: Cert | null; onClose: () => void }
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, [cert, onClose]);
+  useScrollLock(!!cert);
   if (!cert) return null;
   const isPdf = cert.file.endsWith(".pdf");
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${cert.title} — view only`}
       className="secure-zone fixed inset-0 z-50 grid place-items-center bg-overlay p-3 backdrop-blur-md sm:p-6"
       onClick={onClose}
       onContextMenu={(e) => e.preventDefault()}
@@ -283,12 +346,8 @@ function CertModal({ cert, onClose }: { cert: Cert | null; onClose: () => void }
             <ShieldCheck className="h-4 w-4 shrink-0" />{" "}
             <span className="truncate">Secured Corporate Record (View Only)</span>
           </span>
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-sm border"
-          >
-            <X className="h-4 w-4" />
+          <button type="button" aria-label="Close" onClick={onClose} className="icon-btn shrink-0">
+            <X className="h-5 w-5" />
           </button>
         </div>
         <div className="grid min-h-0 flex-1 overflow-y-auto md:grid-cols-[1.3fr_1fr]">
@@ -327,7 +386,7 @@ function CertModal({ cert, onClose }: { cert: Cert | null; onClose: () => void }
             <p className="leading-relaxed text-muted-foreground">{cert.desc}</p>
             <a
               href={`mailto:${EMAIL}?subject=${encodeURIComponent("Verified copy request: " + cert.title)}`}
-              className="lift block rounded-sm bg-gradient-gold px-5 py-3 text-center font-semibold text-primary-foreground"
+              className="btn btn-primary btn-block"
             >
               Request verified copy
             </a>
@@ -341,26 +400,29 @@ function CertModal({ cert, onClose }: { cert: Cert | null; onClose: () => void }
 function Credentials({ d }: { d: Division }) {
   const [cert, setCert] = useState<Cert | null>(null);
   return (
-    <section className="border-y bg-card py-20 sm:py-28">
+    <section aria-labelledby="credentials-heading" className="border-y bg-card py-16 sm:py-28">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mx-auto max-w-2xl text-center">
           <Eyebrow>{d.key === "agro" ? "Fully Compliant Exporter" : "Trust & Legality"}</Eyebrow>
-          <h2 className="font-display text-3xl sm:text-5xl">
+          <h2 id="credentials-heading" className="text-balance font-display text-3xl sm:text-5xl">
             Corporate <span className="font-serif italic text-gradient-gold">Credentials</span>
           </h2>
-          <p className="mt-4 text-muted-foreground">{d.credBody}</p>
+          <p className="mt-4 text-base text-muted-foreground sm:text-lg">{d.credBody}</p>
         </div>
         <div className="mt-12 grid gap-6 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
           {CERTS.map((c) => (
-            <button
+            <article
               key={c.title}
-              onClick={() => setCert(c)}
-              className="lift rounded-sm border bg-background p-6 text-left"
+              className="lift flex flex-col rounded-sm border bg-background p-6"
             >
-              <span className="text-3xl">{c.icon}</span>
+              <span className="text-3xl" aria-hidden="true">
+                {c.icon}
+              </span>
               <h3 className="mt-4 font-display text-lg">{c.short}</h3>
-              <p className="text-xs uppercase tracking-widest text-primary">{c.issuerShort}</p>
-              <p className="mt-2 wrap-break-word text-xs font-semibold text-sand">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                {c.issuerShort}
+              </p>
+              <p className="mt-2 wrap-break-word text-sm font-semibold text-sand">
                 {c.short === "GST Certificate"
                   ? "GSTIN"
                   : c.short === "Import Export Code"
@@ -370,11 +432,16 @@ function Credentials({ d }: { d: Division }) {
                       : "Certificate No."}
                 : {c.regId}
               </p>
-              <p className="mt-3 text-sm text-muted-foreground">{c.blurb}</p>
-              <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                Verify Credentials <ArrowUpRight className="h-4 w-4" />
-              </span>
-            </button>
+              <p className="mt-3 flex-1 text-sm text-muted-foreground">{c.blurb}</p>
+              <button
+                type="button"
+                onClick={() => setCert(c)}
+                aria-haspopup="dialog"
+                className="btn btn-outline btn-sm btn-block mt-5"
+              >
+                Verify Credentials <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </article>
           ))}
         </div>
       </div>
@@ -398,6 +465,7 @@ function ProductDetailsModal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [product, onClose]);
+  useScrollLock(!!product);
   if (!product) return null;
   const details = getProductDetails(product.name);
   return (
@@ -415,7 +483,7 @@ function ProductDetailsModal({
           type="button"
           onClick={onClose}
           aria-label="Close product details"
-          className="absolute right-3 top-3 z-10 rounded-full border bg-background p-2"
+          className="icon-btn absolute right-3 top-3 z-10"
         >
           <X className="h-5 w-5" />
         </button>
@@ -428,9 +496,11 @@ function ProductDetailsModal({
             />
           </div>
           <div className="p-5 sm:p-8">
-            <p className="text-xs uppercase tracking-[0.2em] text-primary">{product.label}</p>
-            <h3 className="mt-2 pr-8 font-display text-2xl sm:text-3xl">{product.name}</h3>
-            <p className="mt-4 text-sm leading-6 text-muted-foreground">{details.description}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              {product.label}
+            </p>
+            <h3 className="mt-2 pr-12 font-display text-2xl sm:text-3xl">{product.name}</h3>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{details.description}</p>
             <div className="mt-5 divide-y rounded-sm border">
               {details.specifications.map(([label, value]) => (
                 <div
@@ -442,7 +512,7 @@ function ProductDetailsModal({
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
+            <p className="mt-3 text-sm text-muted-foreground">
               Specifications and availability should be confirmed for the selected lot/design before
               ordering.
             </p>
@@ -454,7 +524,7 @@ function ProductDetailsModal({
                 );
                 onClose();
               }}
-              className="lift mt-6 block rounded-sm bg-gradient-gold px-5 py-3 text-center text-sm font-semibold text-primary-foreground"
+              className="btn btn-primary btn-block mt-6"
             >
               Inquire About This Product
             </a>
@@ -470,53 +540,73 @@ function Collections({ d }: { d: Division }) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const items = d.products.filter((p) => p.cat === tab);
   return (
-    <section id="collections" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
+    <section id="collections" className="mx-auto max-w-7xl px-4 py-16 sm:py-28">
       <div className="text-center">
         <Eyebrow>{d.key === "agro" ? "Global Food Standard" : "Exclusive Range"}</Eyebrow>
-        <h2 className="font-display text-3xl sm:text-5xl">
+        <h2 className="text-balance font-display text-3xl sm:text-5xl">
           Our {d.collectionsTitle[0]}{" "}
           <span className="font-serif italic text-gradient-gold">{d.collectionsTitle[1]}</span>
         </h2>
       </div>
-      <div className="no-scrollbar -mx-4 mt-10 overflow-x-auto px-4">
-        <div className="mx-auto flex w-max gap-3">
-          {d.tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`whitespace-nowrap rounded-sm border px-6 py-3 text-sm uppercase tracking-widest transition-all duration-500 ${tab === t.id ? "border-transparent bg-gradient-gold text-primary-foreground shadow-glow" : "text-muted-foreground hover:border-primary hover:text-foreground"}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      <div
+        role="group"
+        aria-label="Product categories"
+        className="mt-10 flex flex-wrap justify-center gap-3"
+      >
+        {d.tabs.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            aria-pressed={tab === t.id}
+            onClick={() => setTab(t.id)}
+            className="tab-btn"
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
       <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-6">
         {items.map((product) => (
-          <button
+          <article
             key={product.img}
-            type="button"
-            onClick={() => setSelectedProduct(product)}
-            className="lift group overflow-hidden rounded-sm border bg-card text-left focus-visible:outline-2 focus-visible:outline-primary"
+            className="lift group flex flex-col overflow-hidden rounded-sm border bg-card"
           >
-            <div className="aspect-square overflow-hidden bg-muted">
+            <button
+              type="button"
+              onClick={() => setSelectedProduct(product)}
+              aria-label={`View details: ${product.name}`}
+              aria-haspopup="dialog"
+              className="block aspect-square overflow-hidden bg-muted"
+            >
               <img
                 src={product.img}
                 alt={product.name}
                 loading="lazy"
+                decoding="async"
                 draggable={false}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-            </div>
-            <div className="p-5">
-              <p className="text-xs uppercase tracking-widest text-primary">{product.label}</p>
-              <h3 className="mt-2 font-serif text-xl">{product.name}</h3>
-              <p className="mt-3 text-xs text-muted-foreground">View product photo & details ↗</p>
-              <p className="mt-2 text-[11px] italic text-muted-foreground">
+            </button>
+            <div className="flex flex-1 flex-col p-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                {product.label}
+              </p>
+              <h3 className="mt-2 flex-1 font-serif text-xl font-semibold leading-snug">
+                {product.name}
+              </h3>
+              <p className="mt-3 text-xs italic text-muted-foreground">
                 *This image is for illustration purpose only
               </p>
+              <button
+                type="button"
+                onClick={() => setSelectedProduct(product)}
+                aria-haspopup="dialog"
+                className="btn btn-outline btn-sm btn-block mt-4"
+              >
+                View details
+              </button>
             </div>
-          </button>
+          </article>
         ))}
       </div>
       <ProductDetailsModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
@@ -526,7 +616,7 @@ function Collections({ d }: { d: Division }) {
 
 function BuyerHighlights() {
   return (
-    <section className="border-y bg-card py-12 sm:py-16">
+    <section aria-label="Buyer highlights" className="border-y bg-card py-12 sm:py-16">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4">
         {TRUST_HIGHLIGHTS.map((item) => (
           <div key={item.title} className="lift rounded-sm border bg-background p-5 sm:p-6">
@@ -534,7 +624,7 @@ function BuyerHighlights() {
               {item.icon}
             </span>
             <h3 className="mt-3 font-display text-lg">{item.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
           </div>
         ))}
       </div>
@@ -544,22 +634,24 @@ function BuyerHighlights() {
 
 function OrderProcess() {
   return (
-    <section id="process" className="mx-auto max-w-7xl px-4 py-20 sm:py-28">
+    <section id="process" className="mx-auto max-w-7xl px-4 py-16 sm:py-28">
       <div className="mx-auto max-w-3xl text-center">
         <Eyebrow>From Inquiry to Shipment</Eyebrow>
         <h2 className="font-display text-3xl sm:text-5xl">
           How an <span className="font-serif italic text-gradient-gold">Order Works</span>
         </h2>
-        <p className="mt-4 text-muted-foreground">Simple steps from inquiry to delivery.</p>
+        <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+          Simple steps from inquiry to delivery.
+        </p>
       </div>
       <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {ORDER_STEPS.map((step, index) => (
           <li key={step.title} className="lift rounded-sm border bg-card p-5 sm:p-6">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-gold font-semibold text-primary-foreground">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
               {index + 1}
             </span>
             <h3 className="mt-4 font-display text-lg">{step.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.body}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
           </li>
         ))}
       </ol>
@@ -569,11 +661,11 @@ function OrderProcess() {
 
 function BuyerFAQ() {
   return (
-    <section id="faq" className="border-y bg-card py-20 sm:py-28">
+    <section id="faq" aria-labelledby="faq-heading" className="border-y bg-card py-16 sm:py-28">
       <div className="mx-auto max-w-4xl px-4">
         <div className="text-center">
           <Eyebrow>Buyer Information</Eyebrow>
-          <h2 className="font-display text-3xl sm:text-5xl">
+          <h2 id="faq-heading" className="font-display text-3xl sm:text-5xl">
             Buyer <span className="font-serif italic text-gradient-gold">FAQ</span>
           </h2>
         </div>
@@ -583,13 +675,18 @@ function BuyerFAQ() {
               key={item.question}
               className="group rounded-sm border bg-background p-4 sm:p-5"
             >
-              <summary className="cursor-pointer list-none pr-6 font-semibold marker:hidden">
+              <summary className="min-h-6 cursor-pointer list-none pr-2 text-base font-semibold marker:hidden">
                 <span className="flex items-center justify-between gap-3">
                   {item.question}
-                  <span className="text-primary transition-transform group-open:rotate-45">＋</span>
+                  <span
+                    className="text-primary transition-transform group-open:rotate-45"
+                    aria-hidden="true"
+                  >
+                    ＋
+                  </span>
                 </span>
               </summary>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">{item.answer}</p>
             </details>
           ))}
         </div>
@@ -600,7 +697,7 @@ function BuyerFAQ() {
 
 function Why({ d }: { d: Division }) {
   return (
-    <section id="why" className="border-y bg-card py-20 sm:py-28">
+    <section id="why" className="border-y bg-card py-16 sm:py-28">
       <div className="mx-auto max-w-7xl px-4">
         <div className="text-center">
           <Eyebrow>{d.key === "agro" ? "Global Supply Standard" : "Our Promise"}</Eyebrow>
@@ -612,12 +709,13 @@ function Why({ d }: { d: Division }) {
           {d.why.map((w) => (
             <div
               key={w.title}
-              tabIndex={0}
-              className="lift rounded-sm border bg-background p-8 text-center"
+              className="lift rounded-sm border bg-background p-6 text-center sm:p-8"
             >
-              <span className="text-4xl">{w.icon}</span>
+              <span className="text-4xl" aria-hidden="true">
+                {w.icon}
+              </span>
               <h3 className="mt-4 font-display text-xl">{w.title}</h3>
-              <p className="mt-3 text-sm text-muted-foreground">{w.body}</p>
+              <p className="mt-3 text-base text-muted-foreground">{w.body}</p>
             </div>
           ))}
         </div>
@@ -628,31 +726,32 @@ function Why({ d }: { d: Division }) {
 
 function CrossDivision() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20">
-      <div className="grid gap-10 rounded-sm border bg-card p-8 sm:p-12 lg:grid-cols-2">
+    <section
+      aria-labelledby="agro-division-heading"
+      className="mx-auto max-w-7xl px-4 py-16 sm:py-20"
+    >
+      <div className="grid gap-10 rounded-sm border bg-card p-6 sm:p-12 lg:grid-cols-2">
         <div>
           <Eyebrow>Corporate Extension</Eyebrow>
-          <h3 className="font-display text-3xl">
+          <h2 id="agro-division-heading" className="font-display text-3xl">
             GOLDAGRO <span className="font-serif italic text-gradient-gold">Agro-Exports</span>{" "}
             Division
-          </h3>
-          <p className="mt-4 text-muted-foreground">
+          </h2>
+          <p className="mt-4 text-base text-muted-foreground">
             Beyond imitation jewellery, GOLDAGRO exports premium agro commodities directly from
             harvesting points across India, under strictly regulated phytosanitary standards.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              to="/"
-              className="lift rounded-sm bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground"
-            >
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link to="/" className="btn btn-primary">
               View Agro Portfolio
             </Link>
             <a
               href={`https://wa.me/${PHONES[0]!.wa}`}
               target="_blank"
               rel="noreferrer"
-              className="lift rounded-sm border px-6 py-3 text-sm font-semibold"
+              className="btn btn-whatsapp"
             >
+              <MessageCircle className="h-5 w-5" aria-hidden="true" />
               WhatsApp Agro Dept.
             </a>
           </div>
@@ -672,9 +771,11 @@ function CrossDivision() {
             ],
           ].map(([i, t, b]) => (
             <div key={t} className="lift flex gap-4 rounded-sm border bg-background p-4">
-              <span className="text-2xl">{i}</span>
+              <span className="text-2xl" aria-hidden="true">
+                {i}
+              </span>
               <div>
-                <h4 className="font-semibold">{t}</h4>
+                <h3 className="text-base font-semibold">{t}</h3>
                 <p className="text-sm text-muted-foreground">{b}</p>
               </div>
             </div>
@@ -686,7 +787,7 @@ function CrossDivision() {
 }
 
 const field =
-  "w-full min-w-0 rounded-sm border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary";
+  "min-h-12 w-full min-w-0 rounded-md border-2 border-muted-foreground/60 bg-background px-4 py-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/80 focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/40";
 
 const COUNTRY_OPTIONS = [
   { name: "India", dial: "+91", postal: "^[1-9][0-9]{5}$", phoneMin: 10, phoneMax: 10 },
@@ -795,21 +896,27 @@ function Inquiry({ d }: { d: Division }) {
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) =>
     setF((prev) => ({ ...prev, [k]: e.target.value }));
   return (
-    <section id="inquiry" className="mx-auto max-w-4xl px-4 py-20 sm:py-28">
+    <section
+      id="inquiry"
+      aria-labelledby="inquiry-heading"
+      className="mx-auto max-w-4xl px-4 py-16 sm:py-28"
+    >
       <div className="text-center">
         <Eyebrow>{d.key === "agro" ? "Global Trade Request" : "Business Proposal"}</Eyebrow>
-        <h2 className="font-display text-3xl sm:text-5xl">{d.inquiry.title}</h2>
-        <p className="mt-4 text-muted-foreground">{d.inquiry.body}</p>
+        <h2 id="inquiry-heading" className="text-balance font-display text-3xl sm:text-5xl">
+          {d.inquiry.title}
+        </h2>
+        <p className="mt-4 text-base text-muted-foreground sm:text-lg">{d.inquiry.body}</p>
         <p className="mt-2 text-sm text-muted-foreground">
           Complete the form, then review and send your inquiry through WhatsApp or Gmail.
         </p>
       </div>
       <form
         onSubmit={viaWa}
-        className="mt-10 grid min-w-0 gap-4 rounded-sm border bg-card p-4 sm:grid-cols-2 sm:p-10"
+        className="mt-10 grid min-w-0 gap-5 rounded-sm border bg-card p-4 sm:grid-cols-2 sm:p-10"
         noValidate
       >
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           Full name{" "}
           <input
             className={field}
@@ -821,7 +928,7 @@ function Inquiry({ d }: { d: Division }) {
             required
           />
         </label>
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           Company name (optional){" "}
           <input
             className={field}
@@ -832,7 +939,7 @@ function Inquiry({ d }: { d: Division }) {
             maxLength={120}
           />
         </label>
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           Business email{" "}
           <input
             className={field}
@@ -845,27 +952,15 @@ function Inquiry({ d }: { d: Division }) {
             required
           />
         </label>
-        <div className="grid gap-2 text-sm">
+        <div className="grid gap-2 text-sm font-medium">
           <label htmlFor="inquiry-phone">Phone / WhatsApp</label>
-          <div className="grid grid-cols-[minmax(6rem,0.75fr)_minmax(0,1.25fr)] gap-2">
-            <select
-              className={field}
-              aria-label="Country calling code"
-              value={f.country}
-              onChange={(e) => {
-                const c = COUNTRY_OPTIONS.find((x) => x.name === e.target.value)!;
-                setF((prev) => ({ ...prev, country: c.name, dial: c.dial }));
-              }}
+          <div className="flex gap-2">
+            <span
+              className="inline-flex min-h-12 min-w-16 shrink-0 items-center justify-center rounded-md border-2 border-muted-foreground/60 bg-muted px-3 text-base font-semibold"
+              title="Country calling code (set by the Country field)"
             >
-              <option value="" disabled>
-                Select country
-              </option>
-              {COUNTRY_OPTIONS.map((c) => (
-                <option key={c.name} value={c.name}>
-                  {c.name} ({c.dial})
-                </option>
-              ))}
-            </select>
+              {f.dial}
+            </span>
             <input
               id="inquiry-phone"
               className={field}
@@ -878,12 +973,12 @@ function Inquiry({ d }: { d: Division }) {
               required
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Enter the national number without the country code; the calling code is added
-            separately.
+          <p className="text-xs font-normal text-muted-foreground">
+            Enter the national number without the country code. The calling code follows the Country
+            you select.
           </p>
         </div>
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           Country{" "}
           <select
             className={field}
@@ -901,7 +996,7 @@ function Inquiry({ d }: { d: Division }) {
             ))}
           </select>
         </label>
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           PIN / postal code{" "}
           <input
             className={field}
@@ -913,7 +1008,7 @@ function Inquiry({ d }: { d: Division }) {
             required
           />
         </label>
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           Destination port{" "}
           <input
             className={field}
@@ -924,7 +1019,7 @@ function Inquiry({ d }: { d: Division }) {
             required
           />
         </label>
-        <label className="grid gap-2 text-sm">
+        <label className="grid gap-2 text-sm font-medium">
           Product / category{" "}
           <select className={field} value={f.cat} onChange={set("cat")} required>
             {d.inquiry.categories.map((c) => (
@@ -939,7 +1034,7 @@ function Inquiry({ d }: { d: Division }) {
             ))}
           </select>
         </label>
-        <label className="grid gap-2 text-sm sm:col-span-2">
+        <label className="grid gap-2 text-sm font-medium sm:col-span-2">
           Quantity / order size{" "}
           <input
             className={field}
@@ -949,7 +1044,7 @@ function Inquiry({ d }: { d: Division }) {
             maxLength={150}
           />
         </label>
-        <label className="grid gap-2 text-sm sm:col-span-2">
+        <label className="grid gap-2 text-sm font-medium sm:col-span-2">
           Additional requirements{" "}
           <textarea
             className={`${field} min-h-32 resize-y`}
@@ -963,24 +1058,17 @@ function Inquiry({ d }: { d: Division }) {
             maxLength={1500}
           />
         </label>
-        <p className="text-xs leading-5 text-muted-foreground sm:col-span-2">
+        <p className="text-xs leading-relaxed text-muted-foreground sm:col-span-2">
           Your details are used to prepare this inquiry message. WhatsApp and Gmail will open with
           the message filled in; you must press Send in that app. Format checks cannot confirm that
           a phone number or postal code is active or belongs to you.
         </p>
-        <button
-          type="submit"
-          className="lift flex min-w-0 items-center justify-center gap-2 rounded-sm bg-gradient-gold px-4 py-3.5 text-sm font-semibold text-primary-foreground sm:col-span-1"
-        >
-          <MessageCircle className="h-5 w-5 shrink-0" />
+        <button type="submit" className="btn btn-whatsapp btn-block min-w-0">
+          <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
           Send Inquiry via WhatsApp
         </button>
-        <button
-          type="button"
-          onClick={viaGmail}
-          className="lift flex min-w-0 items-center justify-center gap-2 rounded-sm border px-4 py-3.5 text-sm font-semibold sm:col-span-1"
-        >
-          <Mail className="h-5 w-5 shrink-0" />
+        <button type="button" onClick={viaGmail} className="btn btn-outline btn-block min-w-0">
+          <Mail className="h-5 w-5 shrink-0" aria-hidden="true" />
           Send Inquiry via Gmail
         </button>
       </form>
@@ -989,33 +1077,67 @@ function Inquiry({ d }: { d: Division }) {
 }
 
 function Contact({ d }: { d: Division }) {
+  const phone = PHONES[0]!;
+  const tel = `+${phone.wa}`;
   const items = [
-    { icon: MapPin, t: "Corporate Office", v: [ADDRESS] },
-    { icon: Phone, t: "Operational Lines", v: PHONES.map((p) => p.label) },
-    { icon: Mail, t: "Email Us", v: [EMAIL] },
+    {
+      icon: MapPin,
+      t: "Corporate Office",
+      body: <address className="not-italic text-base text-muted-foreground">{ADDRESS}</address>,
+    },
+    {
+      icon: Phone,
+      t: "Phone / WhatsApp",
+      body: (
+        <a
+          href={`tel:${tel}`}
+          className="inline-flex min-h-11 items-center text-base font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {phone.label}
+        </a>
+      ),
+    },
+    {
+      icon: Mail,
+      t: "Email Us",
+      body: (
+        <a
+          href={`mailto:${EMAIL}`}
+          className="inline-flex min-h-11 items-center break-all text-base font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {EMAIL}
+        </a>
+      ),
+    },
     {
       icon: Globe,
       t: "Global Export Services",
-      v: ["Direct maritime dispatch from Mumbai customs ports"],
+      body: (
+        <p className="text-base text-muted-foreground">
+          Direct maritime dispatch from Mumbai customs ports
+        </p>
+      ),
     },
   ];
   return (
-    <section id="contact" className="border-t bg-card py-20 sm:py-28">
+    <section
+      id="contact"
+      aria-labelledby="contact-heading"
+      className="border-t bg-card py-16 sm:py-28"
+    >
       <div className="mx-auto max-w-7xl px-4">
         <div className="text-center">
           <Eyebrow>HQ Coordinate</Eyebrow>
-          <h2 className="font-display text-3xl sm:text-5xl">{d.contactTitle}</h2>
+          <h2 id="contact-heading" className="text-balance font-display text-3xl sm:text-5xl">
+            {d.contactTitle}
+          </h2>
         </div>
         <div className="mt-12 grid gap-6 grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))]">
-          {items.map(({ icon: I, t, v }) => (
-            <div key={t} className="lift rounded-sm border bg-background p-6">
-              <I className="h-6 w-6 text-primary" />
+          {items.map(({ icon: I, t, body }) => (
+            <div key={t} className="rounded-sm border bg-background p-6">
+              <I className="h-6 w-6 text-primary" aria-hidden="true" />
               <h3 className="mt-4 font-display text-lg">{t}</h3>
-              {v.map((x) => (
-                <p key={x} className="mt-2 wrap-break-word text-sm text-muted-foreground">
-                  {x}
-                </p>
-              ))}
+              <div className="mt-2 wrap-break-word">{body}</div>
             </div>
           ))}
         </div>
@@ -1026,34 +1148,49 @@ function Contact({ d }: { d: Division }) {
 
 function Footer({ d }: { d: Division }) {
   return (
-    <footer className="border-t px-4 py-12">
+    <footer className="border-t px-4 pb-28 pt-12 sm:pb-12">
       <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[2fr_1fr_1fr]">
         <div>
           <p className="font-display text-xl tracking-[0.2em]">GOLDAGRO</p>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground">{d.footerBlurb}</p>
+          <address className="mt-4 max-w-sm text-sm not-italic text-muted-foreground">
+            {ADDRESS}
+          </address>
+          <ul className="mt-3 grid gap-1 text-sm text-muted-foreground">
+            {ABOUT_FACTS.slice(3).map((fact) => (
+              <li key={fact}>{fact}</li>
+            ))}
+          </ul>
         </div>
-        <div className="grid gap-2 text-sm">
+        <nav aria-label="Footer" className="grid content-start gap-1 text-sm">
           {d.nav.slice(0, 4).map((n) => (
-            <a key={n.id} href={`#${n.id}`} className="text-muted-foreground hover:text-primary">
+            <a
+              key={n.id}
+              href={`#${n.id}`}
+              className="inline-flex min-h-11 items-center text-muted-foreground hover:text-primary"
+            >
               {n.label}
             </a>
           ))}
-        </div>
-        <div className="grid gap-2 text-sm">
-          <Link to={d.switchTo} className="text-primary">
+        </nav>
+        <div className="grid content-start gap-1 text-sm">
+          <Link
+            to={d.switchTo}
+            className="inline-flex min-h-11 items-center font-semibold text-primary"
+          >
             {d.key === "agro" ? "Jewellery Portfolio ↗" : "Agro Exports ↗"}
           </Link>
           <a
             href={`https://wa.me/${PHONES[0]!.wa}`}
             target="_blank"
             rel="noreferrer"
-            className="text-muted-foreground hover:text-primary"
+            className="inline-flex min-h-11 items-center text-muted-foreground hover:text-primary"
           >
             WhatsApp Desk
           </a>
         </div>
       </div>
-      <p className="mx-auto mt-10 max-w-7xl border-t pt-6 text-xs text-muted-foreground">
+      <p className="mx-auto mt-10 max-w-7xl border-t pt-6 text-sm text-muted-foreground">
         © 2026 Goldagro Global Export. All Rights Reserved.
       </p>
     </footer>
@@ -1063,9 +1200,9 @@ function Footer({ d }: { d: Division }) {
 export function DivisionPage({ d }: { d: Division }) {
   useSecurityShield();
   return (
-    <div className={`${d.theme} min-h-screen overflow-x-hidden bg-background text-foreground`}>
+    <div className={`${d.theme} min-h-screen overflow-x-clip bg-background text-foreground`}>
       <Header d={d} />
-      <main>
+      <main id="main">
         <Hero d={d} />
         <About d={d} />
         <Credentials d={d} />
@@ -1084,9 +1221,9 @@ export function DivisionPage({ d }: { d: Division }) {
         target="_blank"
         rel="noreferrer"
         aria-label="Chat with GOLDAGRO on WhatsApp"
-        className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:bottom-6 sm:right-6"
+        className="btn btn-whatsapp fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 h-14 w-14 rounded-full p-0 shadow-xl sm:right-6 sm:w-auto sm:px-5"
       >
-        <MessageCircle className="h-5 w-5" />
+        <MessageCircle className="h-6 w-6" aria-hidden="true" />
         <span className="hidden sm:inline">WhatsApp</span>
       </a>
       <Toaster position="top-center" theme="dark" richColors />

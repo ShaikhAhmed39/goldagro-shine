@@ -22,15 +22,26 @@ export type Cert = {
   state: string;
 };
 
-export const PHONES = [
-  { label: "+91 77388 08894", wa: "917738808894" },
-  { label: "+91 98677 01349", wa: "919867701349" },
-  { label: "+91 98675 05450", wa: "919867505450" },
-];
+export const PHONES = [{ label: "+91 77388 08894", wa: "917738808894" }];
 export const EMAIL = "ak12341235@gmail.com";
 export const GST = "27HFFPK4882F1Z3";
+export const BRAND = "GOLDAGRO Global Export";
+// Set VITE_SITE_URL (e.g. https://www.yourdomain.com) in Netlify so canonical, Open Graph and
+// structured-data URLs are emitted. Left empty, those absolute-URL tags are skipped instead of
+// pointing at a wrong domain.
+export const SITE_URL: string = (
+  (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.["VITE_SITE_URL"] ??
+  ""
+).replace(/\/+$/, "");
+export const ADDRESS_PARTS = {
+  street: "Dream House, Shop No. 6, 1st Floor, Naya Nagar",
+  locality: "Mira Road (East), Thane",
+  region: "Maharashtra",
+  postalCode: "401107",
+  country: "IN",
+};
 export const ADDRESS =
-  "Dream house,shop no 6,1 floor, naya nagar,mira road (E),thane:401107, maharashtra";
+  "Dream House, Shop No. 6, 1st Floor, Naya Nagar, Mira Road (East), Thane 401107, Maharashtra, India";
 
 // Content below follows the supplied GOLDAGRO HTML. Verify commercial terms with the client before publishing.
 export const BUYER_FAQ = [
@@ -52,7 +63,8 @@ export const BUYER_FAQ = [
   },
   {
     question: "How long is delivery?",
-    answer: "Loading is typically __ days after payment; sea transit depends on your port.",
+    answer:
+      "Loading time is confirmed in your quotation and depends on the product, quantity and season. Sea transit time depends on your destination port.",
   },
   {
     question: "Which documents do you provide?",
@@ -62,15 +74,15 @@ export const BUYER_FAQ = [
 ];
 
 export const ORDER_STEPS = [
-  { title: "Inquiry", body: "tell us product, quantity and destination port." },
-  { title: "Specs & quote", body: "we send specifications and an FOB / CIF price." },
-  { title: "Sample", body: "approve a sample before ordering (courier charges apply)." },
-  { title: "Contract & payment", body: "proforma invoice and agreed payment terms (T/T or L/C)." },
+  { title: "Inquiry", body: "Tell us product, quantity and destination port." },
+  { title: "Specs & quote", body: "We send specifications and an FOB / CIF price." },
+  { title: "Sample", body: "Approve a sample before ordering (courier charges apply)." },
+  { title: "Contract & payment", body: "Proforma invoice and agreed payment terms (T/T or L/C)." },
   {
     title: "Packing & inspection",
-    body: "packing to your requirements, third-party inspection on request.",
+    body: "Packing to your requirements, third-party inspection on request.",
   },
-  { title: "Shipping", body: "container loading at Mumbai, documents sent for customs clearance." },
+  { title: "Shipping", body: "Container loading at Mumbai, documents sent for customs clearance." },
 ];
 
 export const TRUST_HIGHLIGHTS = [
@@ -192,6 +204,28 @@ const PRODUCT_DETAILS: Record<string, { description: string; specifications: [st
         ["HS Code", "0804.30"],
       ],
     },
+    "Fresh Juicy Mosambi (Premium Indian Sweet Lime)": {
+      description:
+        "Fresh mosambi (sweet lime) for export, graded by size. Final maturity, size grade and packing are confirmed per shipment.",
+      specifications: [
+        ["Origin", "Maharashtra / Andhra Pradesh (confirm per season)"],
+        ["Size", "Graded by diameter (confirm per lot)"],
+        ["Packaging", "Cartons (confirm weight per lot)"],
+        ["MOQ", "1 x 20ft reefer"],
+        ["HS Code", "0805.90"],
+      ],
+    },
+    "G-9 Cavendish Bananas (Strict Calibration)": {
+      description:
+        "G-9 Cavendish bananas for export, calibrated by size in temperature-managed shipments.",
+      specifications: [
+        ["Origin", "Jalgaon, Maharashtra / Gujarat"],
+        ["Preparation", "Cut hands / clusters"],
+        ["Packaging", "13 kg cartons"],
+        ["MOQ", "1 x 20ft reefer"],
+        ["HS Code", "0803.90"],
+      ],
+    },
     "Fresh Banana (Cavendish)": {
       description: "Fresh Cavendish bananas for export in temperature-managed shipments.",
       specifications: [
@@ -241,6 +275,8 @@ export function getProductDetails(name: string) {
         ["HS Code", "0703.10"],
       ] as [string, string][],
     };
+  if (/Mosambi|Sweet Lime/i.test(name))
+    return PRODUCT_DETAILS["Fresh Juicy Mosambi (Premium Indian Sweet Lime)"]!;
   if (/Banana|Cavendish/i.test(name))
     return {
       description: "Fresh Cavendish bananas for export in temperature-managed shipments.",
@@ -276,6 +312,7 @@ export function getProductDetails(name: string) {
         ["HS Code", "0810.90"],
       ] as [string, string][],
     };
+  if (/Necklace/i.test(name)) return PRODUCT_DETAILS["Exquisite Necklace 1"]!;
   if (/Earrings/i.test(name))
     return {
       description:
@@ -406,6 +443,13 @@ const a = (cat: string, label: string, name: string, img: string): Product => ({
   img: `/images/agro/${img}`,
 });
 
+export const ABOUT_FACTS = [
+  "GOLDAGRO Global Export is an Indian merchant exporter based in Thane (Mira Road East), Maharashtra.",
+  "Agro division: Indian spices, fresh fruits and vegetables in containerised sea freight.",
+  "Jewellery division: imitation jewellery (necklaces, bridal sets, bangles, earrings) in bulk.",
+  "Port of loading: Nhava Sheva (JNPT), Mumbai. Terms: FOB / CIF. Payment: T/T or L/C at sight.",
+];
+
 export type Division = {
   key: "agro" | "jewel";
   theme: string;
@@ -535,13 +579,8 @@ export const AGRO: Division = {
     a("Vegetables", "Vegetables", "Sweet Tender Corn Ears (Golden Quality)", "vegtables/corn.jpeg"),
 
     // --- FRUITS ---
-    a(
-      "Fruits",
-      "Fruits",
-      "Fresh Juicy Mosambi (Premium Indian Sweet Lime)",
-      "fruits/sweet_lime.jpeg",
-    ),
-    a("Fruits", "Fruits", "G-9 Cavendish Bananas (Strict Calibration)", "fruits/bananas.jpeg"),
+    a("Fruits", "Fruits", "Fresh Juicy Mosambi (Premium Indian Sweet Lime)", "fruits/mosambi.jpeg"),
+    a("Fruits", "Fruits", "G-9 Cavendish Bananas (Strict Calibration)", "fruits/banana.jpeg"),
     a("Fruits", "Fruits", "Fresh Sweet Oranges (Juicy Citrus)", "fruits/oranges.jpeg"),
     a("Fruits", "Fruits", "Exotic Queen Pineapple (Sweet & Aromatic)", "fruits/pineapple.jpeg"),
     a("Fruits", "Fruits", "Crisp Red Apples (Premium Harvest)", "fruits/apple.jpeg"),
